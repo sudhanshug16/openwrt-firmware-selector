@@ -1,0 +1,258 @@
+
+{
+    "release_version": "SNAPSHOT",
+    "release_commit": "r10241+1-865e25e049",
+    "devices": {
+        "tplink_archer-c5-v1": {
+            "device_id": "tplink_archer-c5-v1",
+            "supported_devices": ["tplink,archer-c5-v1", "archer-c5"],
+            "vendor": "TP-Link",
+            "model": "Archer C5",
+            "variant": "v1",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c5-v1-squashfs-sysupgrade.bin",
+                    "hash": "92e699c555d8b17423105f5d5fcf3faa6b9edd66f90480372aa5da69b0be5576"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c5-v1-squashfs-factory.bin",
+                    "hash": "e42a929f742e6ac141e277f676b86608ed8468afa3479f0f03a94138ff96ad42"
+                }
+            ]
+        },
+        "tplink_archer-c7-v2": {
+            "device_id": "tplink_archer-c7-v2",
+            "supported_devices": ["tplink,archer-c7-v2", "archer-c7"],
+            "vendor": "TP-Link",
+            "model": "Archer C7",
+            "variant": "v2",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin",
+                    "hash": "a9b49a62bbc5dbef0df90cb365d552a366760b8468c5feaed60d3c1845ab8d29"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v2-squashfs-factory.bin",
+                    "hash": "6bea6065b621d5b34736c1394b08721bbe4efa932068bd4b724e9905d6dcb7d9"
+                },
+                {
+                    "type": "factory-us",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v2-squashfs-factory-us.bin",
+                    "hash": "20e8fc84bb315508874e3feb1734e315c003eed2a1294dcc6ab63050692126c5"
+                },
+                {
+                    "type": "factory-eu",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v2-squashfs-factory-eu.bin",
+                    "hash": "e7ec8fd5a563f0832531063de52e0c207fbedc305d452e6914328d36a9a364e6"
+                }
+            ]
+        },
+        "tplink_tl-wdr4300": {
+            "device_id": "tplink_tl-wdr4300",
+            "supported_devices": ["tplink,tl-wdr4300", "tl-wdr4300"],
+            "vendor": "TP-Link",
+            "model": "TL-WDR4300",
+            "variant": "",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_tl-wdr4300-squashfs-sysupgrade.bin",
+                    "hash": "45b4f33e7f0c357dc61166032bf40891458ee9941e443daf896ae9b825639770"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_tl-wdr4300-squashfs-factory.bin",
+                    "hash": "21c0d11b7343f233f0e35dbf306c1269a0fcd602b0d26dbb5938c80e71e86a27"
+                }
+            ]
+        },
+        "tplink_archer-c7-v4": {
+            "device_id": "tplink_archer-c7-v4",
+            "supported_devices": ["tplink,archer-c7-v4", "archer-c7-v4"],
+            "vendor": "TP-Link",
+            "model": "Archer C7",
+            "variant": "v4",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v4-squashfs-sysupgrade.bin",
+                    "hash": "a0c9ea31608f35bcf88bd5090b721263d6f65396ecc23edaecbfb5ffae007a33"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v4-squashfs-factory.bin",
+                    "hash": "7b44e8942a5ce5ceee04ac02e5cd7582c6e13653c8ce83adc5a60efca93bf25e"
+                }
+            ]
+        },
+        "tplink_archer-c59-v1": {
+            "device_id": "tplink_archer-c59-v1",
+            "supported_devices": ["tplink,archer-c59-v1", "archer-c59-v1"],
+            "vendor": "TP-Link",
+            "model": "Archer C59",
+            "variant": "v1",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c59-v1-squashfs-sysupgrade.bin",
+                    "hash": "e0e6612dfbb961c62877cc347476d699e7f4b5aeca0355c468ac5716f3696b94"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c59-v1-squashfs-factory.bin",
+                    "hash": "99134ef23c69d055f45e20cfa638a287fc5182bec0825128d9cb0458471727d7"
+                }
+            ]
+        },
+        "tplink_archer-c2-v3": {
+            "device_id": "tplink_archer-c2-v3",
+            "supported_devices": ["tplink,archer-c2-v3"],
+            "vendor": "TP-Link",
+            "model": "Archer C2",
+            "variant": "v3",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c2-v3-squashfs-sysupgrade.bin",
+                    "hash": "fd213ce0adaf8ba6434862a208a520887f8d26c6d2a8145acce15d0e243b4578"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c2-v3-squashfs-factory.bin",
+                    "hash": "034a015d3fa00be116055ee11b2a2e7bbf8ac8bf4f26273dda49f2dcb959e3ff"
+                }
+            ]
+        },
+        "tplink_archer-c6-v2": {
+            "device_id": "tplink_archer-c6-v2",
+            "supported_devices": ["tplink,archer-c6-v2"],
+            "vendor": "TP-Link",
+            "model": "Archer C6",
+            "variant": "v2",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c6-v2-squashfs-factory.bin",
+                    "hash": "793473938124b55c9808e3d755fadf331dbc555e3e8d48506755b28a49260d2e"
+                },
+                {
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c6-v2-squashfs-sysupgrade.bin",
+                    "hash": "ec130a2f5d3d3db5f883274584823e6018bb1d8f8f0c7177a0853cd70bc75186"
+                }
+            ]
+        },
+        "tplink_archer-c7-v5": {
+            "device_id": "tplink_archer-c7-v5",
+            "supported_devices": ["tplink,archer-c7-v5", "archer-c7-v5"],
+            "vendor": "TP-Link",
+            "model": "Archer C7",
+            "variant": "v5",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v5-squashfs-sysupgrade.bin",
+                    "hash": "cf673e3af5f9e985f30a3adf2c7f96e5210b036a4cc43a080c9f5c023e1bdd84"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v5-squashfs-factory.bin",
+                    "hash": "523a5fe3a8616ecd52d5a5117b49f9f114c496f720fc7b8fc97c4f82bf077822"
+                }
+            ]
+        },
+        "tplink_archer-c7-v1": {
+            "device_id": "tplink_archer-c7-v1",
+            "supported_devices": ["tplink,archer-c7-v1", "archer-c7"],
+            "vendor": "TP-Link",
+            "model": "Archer C7",
+            "variant": "v1",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v1-squashfs-sysupgrade.bin",
+                    "hash": "13728d071e4c357ca3cbcad6064b26e0caec422191ddbc0cf109c5021bc0ed47"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c7-v1-squashfs-factory.bin",
+                    "hash": "8096c5a5decfa8af6e7195a49d71fbb3da02d1a014a553974bcd6dc59b64778c"
+                }
+            ]
+        },
+        "tplink_archer-c58-v1": {
+            "device_id": "tplink_archer-c58-v1",
+            "supported_devices": ["tplink,archer-c58-v1", "archer-c58-v1"],
+            "vendor": "TP-Link",
+            "model": "Archer C58",
+            "variant": "v1",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_archer-c58-v1-squashfs-factory.bin",
+                    "hash": "a740142322a9c6e814b7c42398d47004c15db9f2aec9b913e8d9ad34e18a80ae"
+                },
+                {
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_archer-c58-v1-squashfs-sysupgrade.bin",
+                    "hash": "cb36b50b646137ff05ed23ed7fbaabffeb032d0b5da214a3586d7b086088c17a"
+                }
+            ]
+        },
+        "tplink_tl-wdr3600": {
+            "device_id": "tplink_tl-wdr3600",
+            "supported_devices": ["tplink,tl-wdr3600", "tl-wdr4300"],
+            "vendor": "TP-Link",
+            "model": "TL-WDR3600",
+            "variant": "",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_tl-wdr3600-squashfs-sysupgrade.bin",
+                    "hash": "fbbcbd9e1174026c001d002149a641db8ebeb459892eff442c975d9043bf2b64"
+                },
+                {
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_tl-wdr3600-squashfs-factory.bin",
+                    "hash": "2d7120d2f4593d6e0a8d5d8164666aaa54c51bcbeef6f9c8c2ab1f2a75e7b728"
+                }
+            ]
+        },
+        "tplink_tl-wdr4900-v2": {
+            "device_id": "tplink_tl-wdr4900-v2",
+            "supported_devices": ["tplink,tl-wdr4900-v2"],
+            "vendor": "TP-Link",
+            "model": "TL-WDR4900",
+            "variant": "v2",
+            "target": "ath79",
+            "subtarget": "generic",
+            "images": [{
+                    "type": "factory",
+                    "name": "openwrt-ath79-generic-tplink_tl-wdr4900-v2-squashfs-factory.bin",
+                    "hash": "f4b096db93eb4cc504d2b98972c8a638b14a811eb0643c1fdac40d1ca0e7ae33"
+                },
+                {
+                    "type": "sysupgrade",
+                    "name": "openwrt-ath79-generic-tplink_tl-wdr4900-v2-squashfs-sysupgrade.bin",
+                    "hash": "d5286e54feca1a9ce1c2d4b5d6b05b027796b755a00550629741cb9318106d75"
+                }
+            ]
+        }
+    }
+}
+

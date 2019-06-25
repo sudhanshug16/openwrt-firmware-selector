@@ -1,0 +1,22 @@
+.home-container {
+    margin-top: 30px;
+    .MuiPaper-root {
+        padding: 30px;
+        text-align: left;
+        .MuiTypography-h4 {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    }
+}
+
+.device-table {
+	margin-top: 20px;
+    width: 100%;
+    td {
+        padding: 20px 30px;
+    }
+    tr:nth-child(odd) {
+        background-color: rgba(104, 74, 238, 0.07);
+    }
+}

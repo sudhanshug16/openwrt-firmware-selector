@@ -1,25 +1,67 @@
 import React from "react";
-import AppBar from '@material-ui/core/AppBar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import LanguageIcon from '@material-ui/icons/Language';
-import { Toolbar } from '@material-ui/core';
+import { Toolbar, Typography, AppBar, Button, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Popper, Fade, Paper } from '@material-ui/core';
+import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
 
-class Header extends React.Component {
-  render() {
-    return (
-      <AppBar position="static">
-        <Toolbar>
-          <Typography edge="start" variant="h6">OpenWrt Firmware Selector Wizard</Typography>
-          <div style={{flexGrow: 1}}></div>
-          <Button color="secondary"  variant="contained">
-            Change Language &nbsp;
-            <LanguageIcon />
-          </Button>
-        </Toolbar>
-      </AppBar>
-    );
+export default function Header() {
+
+  const { t, i18n } = useTranslation();
+
+  const [value, setValue] = React.useState('en');
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const changeLanguage = event => {
+    var val = event.target.value;
+    i18n.changeLanguage(val);
+    setAnchorEl(null);
+  };
+
+  const openChangeLanguagePopper = event => {
+    setValue(i18next.language.substring(0, 2));
+    setAnchorEl(anchorEl ? null : event.currentTarget);
   }
-}
 
-export default Header;
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popper' : undefined;
+
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography edge="start" variant="h6">OpenWrt Firmware Selector Wizard</Typography>
+        <div style={{flexGrow: 1}}></div>
+        <Button aria-describedby={id} color="secondary"  variant="contained" onClick={openChangeLanguagePopper}>
+          {t('components.changeLanguage')} &nbsp;
+          <LanguageIcon />
+        </Button>
+        <Popper 
+          id={id} 
+          open={open} 
+          anchorEl={anchorEl} 
+          transition
+          disablePortal	= {true}
+        >
+          {({ TransitionProps }) => (
+            <Fade {...TransitionProps} timeout={350}>
+              <Paper className="language-selector-popper">
+                <FormControl component="fieldset">
+                  <FormLabel component="legend">Change Language</FormLabel>
+                  <br />
+                  <RadioGroup
+                    aria-label="Language"
+                    name="language"
+                    value={value}
+                    onChange={changeLanguage}
+                  >
+                    <FormControlLabel value="en" control={<Radio />} label="English" />
+                    <FormControlLabel value="de" control={<Radio />} label="German" />
+                  </RadioGroup>
+                </FormControl>
+              </Paper>
+            </Fade>
+          )}
+        </Popper>
+      </Toolbar>
+    </AppBar>
+  );
+}

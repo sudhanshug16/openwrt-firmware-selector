@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import './App.scss';
 
@@ -7,6 +7,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import Header from './components/header.js'
 import Home from './containers/home/home';
 import NotFound from './containers/not-found/not-found';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const theme = createMuiTheme({
   palette: {
@@ -22,15 +23,19 @@ const theme = createMuiTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <div className="App">
-        <Header></Header>
-        <Router>
-          <Switch>
-            <Route exact path="/" component={Home}></Route>
-            <Route default component={NotFound}></Route>
-          </Switch>
-        </Router>
-      </div>
+      <Suspense fallback={
+        <LinearProgress />
+      }>
+        <div className="App">
+          <Header></Header>
+          <Router>
+            <Switch>
+              <Route path="" component={Home}></Route>
+              <Route default component={NotFound}></Route>
+            </Switch>
+          </Router>
+        </div>
+      </Suspense>
     </ThemeProvider>
   );
 }

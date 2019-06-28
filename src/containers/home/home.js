@@ -3,6 +3,7 @@ import { Container, Paper, Typography, Grid, Button } from "@material-ui/core";
 import './home.scss';
 import Select from 'react-select';
 import data from '../../data.json';
+import { withTranslation } from 'react-i18next';
 
 class Home extends React.Component {
 
@@ -145,12 +146,19 @@ class Home extends React.Component {
       });
     }
   }
+
+  noOptionsMessage = (props) => <Typography {...props.innerProps}>{this.props.t('components.select.noOptions')}</Typography>;
+
   render() {
     return (
       <Container className="home-container">
         <Paper>
-          <Typography variant="h5">Download OpenWrt firmware for your device!</Typography>
-          <Typography>Please use the input below to download firmware for your device!</Typography>
+          <Typography variant="h5">
+            {this.props.t('appIntro.head')}
+          </Typography>
+          <Typography>
+            {this.props.t('appIntro.para')}
+          </Typography>
           <br />
           <Grid container spacing={2}>
             <Grid item xs={4}>
@@ -158,6 +166,8 @@ class Home extends React.Component {
                 onChange={this.changeVendor}
                 options={this.devices}
                 value={this.state.vendor}
+                placeholder={this.props.t('components.select.placeholder')}
+                noOptionsMessage={this.noOptionsMessage}
               />
             </Grid>
             {
@@ -167,6 +177,8 @@ class Home extends React.Component {
                     onChange={this.changeModel}
                     options={this.state.vendor.value}
                     value={this.state.model}
+                    placeholder={this.props.t('components.select.placeholder')}
+                    noOptionsMessage={this.noOptionsMessage}
                   />
                 </Grid>
               )
@@ -179,6 +191,8 @@ class Home extends React.Component {
                       onChange={this.changeVariant}
                       options={this.state.model.value}
                       value={this.state.variant}
+                      placeholder={this.props.t('components.select.placeholder')}
+                      noOptionsMessage={this.noOptionsMessage}
                     />
                   </Grid>
                 )
@@ -191,24 +205,24 @@ class Home extends React.Component {
             variant="contained"
             onClick={this.findDevice.bind(this)}
           >
-            Submit
+            {this.props.t('components.submit')}
           </Button>
           <br />
           {this.state.showDeviceData ? (
             <table className="device-table">
               <tbody>
                 <tr>
-                  <td>Model</td>
+                  <td>{this.props.t('table.model')}</td>
                   <td>{this.state.device.model}</td>
                 </tr>
                 <tr>
-                  <td>Vendor</td>
+                  <td>{this.props.t('table.vendor')}</td>
                   <td>{this.state.device.vendor}</td>
                 </tr>
                 { 
                   this.state.device.variant === null || this.state.device.variant === '' ? '' : (
                     <tr>
-                      <td>Variant</td>
+                      <td>{this.props.t('table.variant')}</td>
                       <td>{this.state.device.variant}</td>
                     </tr>
                   )
@@ -230,4 +244,4 @@ class Home extends React.Component {
   }
 }
 
-export default Home;
+export default withTranslation()(Home);

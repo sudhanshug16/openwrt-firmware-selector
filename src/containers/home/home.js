@@ -1,158 +1,135 @@
 import React from "react";
-import { Container, Paper, Typography, Grid, Button } from "@material-ui/core";
+import { Container, Paper, Typography, InputAdornment, FormControl, TextField, List, ListItem, ListItemText } from "@material-ui/core";
+import { fade, makeStyles } from '@material-ui/core/styles';
+
+
+import SearchIcon from '@material-ui/icons/Search';
 import './home.scss';
-import Select from 'react-select';
 import data from '../../data.json';
 import { withTranslation } from 'react-i18next';
+import FuzzySet from 'fuzzyset.js';
+
+const useStylesSearch = makeStyles(theme => ({
+  root: {
+    borderColor: '#e2e2e1',
+    overflow: 'hidden',
+    margin: 0,
+    borderRadius: 4,
+    transition: theme.transitions.create(['border-color', 'box-shadow']),
+    '&:hover': {
+      borderColor: fade(theme.palette.primary.main, 0.25),
+    },
+    '&$focused': {
+      backgroundColor: '#fff',
+      boxShadow: `${fade(theme.palette.primary.main, 0.25)} 0 0 0 2px`,
+      borderColor: theme.palette.primary.main,
+    },
+  },
+  focused: {},
+}));
+
+function SearchTextField(props) {
+  const classes = useStylesSearch();
+
+  return (
+  <TextField 
+    variant="outlined"
+    label={
+      <div className="search-label">
+        {props.labelText}
+      </div>
+    }
+    InputProps={
+      { classes, 
+        endAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon className={classes.label} />
+          </InputAdornment>
+        ) 
+      }
+    } {...props} />
+  );
+}
 
 class Home extends React.Component {
 
-  devices = [];
+  deviceNames = [];
+  deviceNamesID = {};
   state = {
-    selectedOption: null,
-    variants: [],
-    models: [],
     showDeviceData: false,
     device: null,
-    vendor: null,
-    model: null,
-    variant: null
+    searchResults: [],
+    showSearch: false,
+    selectedSearchIndex: 0,
+    query: '',
   };
-
-  vendorExistsInDevices(vendor) {
-    var exists = false;
-    var existIndex = -1;
-    this.devices.forEach((d, i) => {
-      if (d["label"] === vendor) {
-        exists = true;
-        existIndex = i;
-      }
-    });
-    return {
-      exists,
-      existIndex
-    };
-  }
-  
-  modelExistsInDevices(vendorIndex, model) {
-    var exists = false;
-    var existIndex = -1;
-    this.devices[vendorIndex]["value"].forEach((d, i) => {
-      if (d["label"] === model) {
-        exists = true;
-        existIndex = i;
-      }
-    });
-    return {
-      exists,
-      existIndex
-    };
-  }
-  
-  variantExistsInDevices(vendorIndex, modelIndex, variant) {
-    var exists = false;
-    var existIndex = -1;
-    this.devices[vendorIndex]["value"][modelIndex]["value"].forEach((d, i) => {
-      if (d["label"] === variant) {
-        exists = true;
-        existIndex = i;
-      }
-    });
-    return {
-      exists,
-      existIndex
-    };
-  }
+  fuzzySet;
 
   componentDidMount() {
-    Object.keys(data["devices"]).forEach((device_id) => {
-      var vendor = "";
-      var variant = "";
-      var device_data = data["devices"][device_id];
-      if ("vendor" in device_data) {
-        vendor = device_data["vendor"];
+    Object.keys(data['devices']).forEach((device_id) => {
+      var deviceName = '';
+      if ('vendor' in data['devices'][device_id]) {
+        deviceName += data['devices'][device_id]['vendor'] + ' ';
       }
-      var model = device_data["model"];
-      if ("variant" in device_data) {
-        variant = device_data["variant"];
-      }
-      var vendorExists = this.vendorExistsInDevices(vendor);
-      if (vendorExists.exists) {
-        var modelExists = this.modelExistsInDevices(vendorExists.existIndex, model);
-        if (modelExists.exists) {
-          var variantExists = this.variantExistsInDevices(vendorExists.existIndex, modelExists.existIndex, variant);
-          if (!variantExists.existIndex) {
-            this.devices[vendorExists.existIndex]["value"][modelExists.existIndex]["value"].push({
-              "label": variant,
-              "value": device_data
-            });
-          }
-        } else {
-          this.devices[vendorExists.existIndex]["value"].push({
-            "label": model,
-            "value": [{
-              "label": variant,
-              "value": device_data
-            }]
-          });
+      deviceName += data['devices'][device_id]['model'];
+      if ('variant' in data['devices'][device_id]) {
+        if (data['devices'][device_id]['variant'] !== '') {
+          deviceName += ' ' + data['devices'][device_id]['variant'];
         }
-      } else {
-        this.devices.push({
-          "label": vendor,
-          "value": [{
-            "label": model,
-            "value": [{
-              "label": variant,
-              "value": device_data
-            }]
-          }]
-        });
       }
+      this.deviceNames.push(deviceName);
+      this.deviceNamesID[deviceName] = device_id;
     });
-  }
-  
-  changeVendor = (v) => {
-    this.setState({
-      vendor: v,
-      model: null,
-      variant: null,
-    });
-  }
-  
-  changeModel = (v) => {
-    this.setState({
-      model: v,
-      variant: v.value[0],
-    });
-  }
-  
-  changeVariant = (v) => {
-    this.setState({
-      variant: v,
-    });
+    this.fuzzySet = FuzzySet(this.deviceNames);
   }
 
-  findDevice = () => {
-    try {
-      var device = this.state.variant.value;
+  selectDevice = (device_id) => {
+    if (device_id != null) {
       this.setState({
-        device: device,
+        device: data["devices"][device_id],
         showDeviceData: true,
-      });
-    } catch (error) {
-      this.setState({
-        device: {},
-        showDeviceData: false,
+        query: data["devices"][device_id]["vendor"] + " " + data["devices"][device_id]["model"] + " " + data["devices"][device_id]["variant"]
       });
     }
   }
 
-  noOptionsMessage = (props) => <Typography {...props.innerProps}>{this.props.t('components.select.noOptions')}</Typography>;
+  search = (event) => {
+    const query = event.target.value;
+    var showSearch = false;
+    this.setState({
+      query,
+      searchResults: [],
+      showSearch,
+    });
+    const deviceNames = this.fuzzySet.get(query, undefined, 0);
+    var searchResults = [];
+    if (deviceNames != null) {
+      for (var i = 0; i < deviceNames.length && i < 6; i++) {
+        searchResults.push(data['devices'][this.deviceNamesID[deviceNames[i][1]]]);
+      }
+    }
+    showSearch = true;
+    if (query === '') {
+      showSearch = false;
+    }
+    this.setState({
+      searchResults,
+      showSearch,
+    });
+  }
+
+  hideSearch = () => {
+    setTimeout(() => {
+      this.setState({
+        showSearch: false,
+      });
+    }, 300);
+  }
 
   render() {
     return (
       <Container className="home-container">
-        <Paper>
+        <Paper className="home-container-paper">
           <Typography variant="h5">
             {this.props.t('appIntro.head')}
           </Typography>
@@ -160,53 +137,50 @@ class Home extends React.Component {
             {this.props.t('appIntro.para')}
           </Typography>
           <br />
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <Select
-                onChange={this.changeVendor}
-                options={this.devices}
-                value={this.state.vendor}
-                placeholder={this.props.t('components.select.placeholder')}
-                noOptionsMessage={this.noOptionsMessage}
-              />
-            </Grid>
-            {
-              this.state.vendor === null ? '' : (
-                <Grid item xs={4}>
-                  <Select
-                    onChange={this.changeModel}
-                    options={this.state.vendor.value}
-                    value={this.state.model}
-                    placeholder={this.props.t('components.select.placeholder')}
-                    noOptionsMessage={this.noOptionsMessage}
-                  />
-                </Grid>
-              )
-            }
-            {
-              this.state.model === null ? '' : (
-                (this.state.model.value.length === 1 && this.state.model.value[0].label === '') ? '' : (
-                  <Grid item xs={4}>
-                    <Select
-                      onChange={this.changeVariant}
-                      options={this.state.model.value}
-                      value={this.state.variant}
-                      placeholder={this.props.t('components.select.placeholder')}
-                      noOptionsMessage={this.noOptionsMessage}
-                    />
-                  </Grid>
-                )
-              )
-            }
-          </Grid>
-          <br />
-          <Button 
-            color="primary" 
-            variant="contained"
-            onClick={this.findDevice.bind(this)}
-          >
-            {this.props.t('components.submit')}
-          </Button>
+          <FormControl fullWidth>
+            <SearchTextField
+              id="outlined-adornment-search-devices"
+              labelText={this.props.t('components.search.label')}
+              value={this.state.query}
+              onChange={this.search}
+              onClick={this.search}
+              onBlur={this.hideSearch}
+            />
+          </FormControl>
+          {
+            this.state.showSearch && (
+              <Paper elevation={4} className="search-results">
+                <List>
+                {
+                  this.state.searchResults.map((res, index) => {
+                    return (
+                      <ListItem
+                        key={res["device_id"]}
+                        button
+                        onClick={() => this.selectDevice(res["device_id"])}
+                      >
+                        <ListItemText primary={
+                          <div>
+                            {res["vendor"]} {res["model"]} {res["variant"]}
+                          </div>
+                        } />
+                      </ListItem>
+                    );
+                  })
+                }
+                </List>
+              </Paper>
+            )
+          }
+          {
+            (this.state.searchResults.length === 0 && this.state.showSearch) && (
+              <Paper elevation={4} className="search-results">
+                <ListItem>
+                  <ListItemText primary={this.props.t('components.search.noResults')}></ListItemText>
+                </ListItem>
+              </Paper>
+            )
+          }
           <br />
           {this.state.showDeviceData ? (
             <table className="device-table">

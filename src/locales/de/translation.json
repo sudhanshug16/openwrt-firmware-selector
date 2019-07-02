@@ -10,6 +10,10 @@
         "select": {
             "placeholder": "Wählen...",
             "noOptions": "Keine Optionen"
+        },
+        "search": {
+            "label": "Suchen Sie Ihr Gerät",
+            "noResults": "Keine Ergebnisse"
         }
     },
     "table": {

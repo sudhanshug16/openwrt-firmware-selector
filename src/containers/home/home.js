@@ -36,7 +36,7 @@ function SearchTextField(props) {
     variant="outlined"
     label={
       <div className="search-label">
-        {props.labelText}
+        {props.labeltext}
       </div>
     }
     InputProps={
@@ -88,6 +88,7 @@ class Home extends React.Component {
       this.setState({
         device: data["devices"][device_id],
         showDeviceData: true,
+        showSearch: false,
         query: data["devices"][device_id]["vendor"] + " " + data["devices"][device_id]["model"] + " " + data["devices"][device_id]["variant"]
       });
     }
@@ -95,11 +96,10 @@ class Home extends React.Component {
 
   search = (event) => {
     const query = event.target.value;
-    var showSearch = false;
     this.setState({
       query,
       searchResults: [],
-      showSearch,
+      showSearch: false,
     });
     const deviceNames = this.fuzzySet.get(query, undefined, 0);
     var searchResults = [];
@@ -108,27 +108,36 @@ class Home extends React.Component {
         searchResults.push(data['devices'][this.deviceNamesID[deviceNames[i][1]]]);
       }
     }
-    showSearch = true;
-    if (query === '') {
-      showSearch = false;
-    }
     this.setState({
       searchResults,
-      showSearch,
+      showSearch: true,
     });
   }
 
-  hideSearch = () => {
-    setTimeout(() => {
-      this.setState({
-        showSearch: false,
-      });
-    }, 300);
+  isDescendant = (parent, child) => {
+    var node = child.parentNode;
+    if (child === parent) {
+        return true;
+    }
+    while (node !== null) {
+        if (node === parent) {
+            return true;
+        }
+        node = node.parentNode;
+    }
+    return false;
+  }
+
+  toggleSearchIfIntended = (event) => {
+    var showSearch = this.isDescendant(document.getElementsByClassName('search-container')[0], event.target) && this.state.query !== '';
+    this.setState({
+      showSearch
+    });
   }
 
   render() {
     return (
-      <Container className="home-container">
+      <Container className="home-container" onClick={this.toggleSearchIfIntended}>
         <Paper className="home-container-paper">
           <Typography variant="h5">
             {this.props.t('appIntro.head')}
@@ -137,16 +146,17 @@ class Home extends React.Component {
             {this.props.t('appIntro.para')}
           </Typography>
           <br />
-          <FormControl fullWidth>
-            <SearchTextField
-              id="outlined-adornment-search-devices"
-              labelText={this.props.t('components.search.label')}
-              value={this.state.query}
-              onChange={this.search}
-              onClick={this.search}
-              onBlur={this.hideSearch}
-            />
-          </FormControl>
+          <div className="search-container">
+            <FormControl fullWidth>
+              <SearchTextField
+                id="outlined-adornment-search-devices"
+                labeltext={this.props.t('components.search.label')}
+                value={this.state.query}
+                onChange={this.search}
+                onClick={this.search}
+              />
+            </FormControl>
+          </div>
           {
             this.state.showSearch && (
               <Paper elevation={4} className="search-results">

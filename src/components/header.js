@@ -28,10 +28,10 @@ export default function Header() {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography edge="start" variant="h6">OpenWrt Firmware Selector Wizard</Typography>
+        <Typography edge="start" variant="h6">{t('OpenWrt Firmware Selector Wizard')}</Typography>
         <div style={{flexGrow: 1}}></div>
         <Button aria-describedby={id} color="secondary"  variant="contained" onClick={openChangeLanguagePopper}>
-          {t('components.changeLanguage')} &nbsp;
+          {t('Change Language')} &nbsp;
           <LanguageIcon />
         </Button>
         <Popper 
@@ -53,8 +53,8 @@ export default function Header() {
                     value={value}
                     onChange={changeLanguage}
                   >
-                    <FormControlLabel value="en" control={<Radio />} label="English" />
-                    <FormControlLabel value="de" control={<Radio />} label="German" />
+                    <FormControlLabel value="en" control={<Radio />} label={t('English')} />
+                    <FormControlLabel value="de" control={<Radio />} label={t('German')} />
                   </RadioGroup>
                 </FormControl>
               </Paper>

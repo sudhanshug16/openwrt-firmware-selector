@@ -140,17 +140,17 @@ class Home extends React.Component {
       <Container className="home-container" onClick={this.toggleSearchIfIntended}>
         <Paper className="home-container-paper">
           <Typography variant="h5">
-            {this.props.t('appIntro.head')}
+            {this.props.t('Download OpenWrt firmware for your device!')}
           </Typography>
           <Typography>
-            {this.props.t('appIntro.para')}
+            {this.props.t('Please use the input below to download firmware for your device!')}
           </Typography>
           <br />
           <div className="search-container">
             <FormControl fullWidth>
               <SearchTextField
                 id="outlined-adornment-search-devices"
-                labeltext={this.props.t('components.search.label')}
+                labeltext={this.props.t('Search...')}
                 value={this.state.query}
                 onChange={this.search}
                 onClick={this.search}
@@ -186,7 +186,7 @@ class Home extends React.Component {
             (this.state.searchResults.length === 0 && this.state.showSearch) && (
               <Paper elevation={4} className="search-results">
                 <ListItem>
-                  <ListItemText primary={this.props.t('components.search.noResults')}></ListItemText>
+                  <ListItemText primary={this.props.t('No results')}></ListItemText>
                 </ListItem>
               </Paper>
             )
@@ -196,17 +196,17 @@ class Home extends React.Component {
             <table className="device-table">
               <tbody>
                 <tr>
-                  <td>{this.props.t('table.model')}</td>
+                  <td>{this.props.t('Model')}</td>
                   <td>{this.state.device.model}</td>
                 </tr>
                 <tr>
-                  <td>{this.props.t('table.vendor')}</td>
+                  <td>{this.props.t('Vendor')}</td>
                   <td>{this.state.device.vendor}</td>
                 </tr>
                 { 
                   this.state.device.variant === null || this.state.device.variant === '' ? '' : (
                     <tr>
-                      <td>{this.props.t('table.variant')}</td>
+                      <td>{this.props.t('Variant')}</td>
                       <td>{this.state.device.variant}</td>
                     </tr>
                   )

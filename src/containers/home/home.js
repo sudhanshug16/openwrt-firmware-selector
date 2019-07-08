@@ -1,10 +1,30 @@
 import React from "react";
-import { Container, Paper, Typography, InputAdornment, FormControl, TextField, List, ListItem, ListItemText, CircularProgress, Button } from "@material-ui/core";
+import { 
+  Container, 
+  Paper, 
+  Typography, 
+  InputAdornment, 
+  FormControl, 
+  TextField, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  CircularProgress, 
+  Button,
+  Grid,
+  ClickAwayListener,
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  ExpansionPanelDetails,
+  Checkbox,
+  FormGroup,
+  FormControlLabel } from "@material-ui/core";
 import { fade, makeStyles } from '@material-ui/core/styles';
-
 
 import SearchIcon from '@material-ui/icons/Search';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import WarningIcon from '@material-ui/icons/Warning';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import './home.scss';
 import { withTranslation } from 'react-i18next';
 import FuzzySet from 'fuzzyset.js';
@@ -57,7 +77,7 @@ class Home extends React.Component {
   deviceNamesID = {};
   state = {
     showDeviceData: false,
-    device: null,
+    device: {},
     deviceLoaded: false,
     devices: [],
     devicesLoaded: false,
@@ -66,17 +86,20 @@ class Home extends React.Component {
     selectedSearchIndex: 0,
     query: '',
     downloading: false,
+    packages: {},
   };
   fuzzySet;
+  packages = ["opkg","ip6tables","odhcp6c","base-files","mtd","fstools","kmod-leds-gpio","busybox","wpad-mini","kmod-gpio-button-hotplug","kmod-mt76","logd","swconfig","dnsmasq","dropbear","ppp","netifd","ppp-mod-pppoe","uci","libc","uclient-fetch","kmod-ipt-offload","libgcc","odhcpd-ipv6only","iptables","firewall","luci"];
 
   getDevicesData = () => fetch('https://chef.libremesh.org/download/json/devices.json').then(res => res.json());
   getDeviceData = (device_id) => fetch('https://chef.libremesh.org/download/json/' + device_id + '.json').then(res => res.json());
 
   componentDidMount() {
     this.getDevicesData().then(data => {
-      Object.keys(data['devices']).forEach((device_name) => {
+      Object.keys(data['devices']).forEach((device_id) => {
+        var device_name = data['devices'][device_id];
         this.deviceNames.push(device_name);
-        this.deviceNamesID[device_name] = data['devices'][device_name];
+        this.deviceNamesID[device_name] = device_id;
       });
       this.fuzzySet = FuzzySet(this.deviceNames);
       this.setState({
@@ -84,17 +107,25 @@ class Home extends React.Component {
         devicesLoaded: true,
       });
     });
+    var packages = {};
+    this.packages.forEach((package_name) => {
+      packages[package_name] = true;
+    });
+    this.setState({
+      packages,
+    });
   }
 
   selectDevice = (device_name) => {
     if (device_name != null) {
+      var device_id = this.deviceNamesID[device_name];
       this.setState({
         showDeviceData: true,
         showSearch: false,
         query: device_name,
         deviceLoaded: false,
       });
-      this.getDeviceData(this.state.devices[device_name]).then(data => {
+      this.getDeviceData(device_id).then(data => {
         this.setState({
           device: data,
           deviceLoaded: true,
@@ -119,28 +150,22 @@ class Home extends React.Component {
     }
     this.setState({
       searchResults,
-      showSearch: true,
+      showSearch: query.length > 0,
     });
   }
 
-  isDescendant = (parent, child) => {
-    var node = child.parentNode;
-    if (child === parent) {
-        return true;
-    }
-    while (node !== null) {
-        if (node === parent) {
-            return true;
-        }
-        node = node.parentNode;
-    }
-    return false;
+  hideSearchResults = () => {
+    console.log("bahar")
+    this.setState({
+      showSearch: false
+    });
   }
 
-  toggleSearchIfIntended = (event) => {
-    var showSearch = this.isDescendant(document.getElementsByClassName('search-container')[0], event.target) && this.state.query !== '';
+  packageSettingChange = (event, package_name) => {
+    var packages = this.state.packages;
+    packages[package_name] = event.target.checked;
     this.setState({
-      showSearch
+      packages,
     });
   }
 
@@ -156,6 +181,23 @@ class Home extends React.Component {
   }
 
   render() {
+    const warning432 = this.state.showDeviceData && parseInt((this.state.device['image_size'] || '').slice(0, -1)) <= 4000 && (
+      <Paper className="warning-432" elevation={0}>
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="center"
+        >
+          <Grid item>
+            <WarningIcon className="icon" />
+          </Grid>
+          <Grid item xs>
+            Devices with ≤4MB flash and/or ≤32MB ram will work but they will be very limited (usually they can't install or run additional packages) because they have low RAM and flash space. Consider this when choosing a device to buy, or when deciding to flash OpenWrt on your device because it is listed as supported.
+          </Grid>
+        </Grid>
+      </Paper>
+    );
     const notLoaded = (
       <CircularProgress />
     );
@@ -168,54 +210,57 @@ class Home extends React.Component {
           {this.props.t('Please use the input below to download firmware for your device!')}
         </Typography>
         <br />
-        <div className="search-container">
-          <FormControl fullWidth>
-            <SearchTextField
-              id="outlined-adornment-search-devices"
-              labeltext={this.props.t('Search your device')}
-              value={this.state.query}
-              onChange={this.search}
-              onClick={this.search}
-            />
-          </FormControl>
-        </div>
-        {
-          this.state.showSearch && (
-            <Paper elevation={4} className="search-results">
-              <List>
-              {
-                this.state.searchResults.map((res, index) => {
-                  return (
-                    <ListItem
-                      key={res}
-                      button
-                      onClick={() => this.selectDevice(res)}
-                    >
-                      <ListItemText primary={
-                        <div>
-                          {res}
-                        </div>
-                      } />
-                    </ListItem>
-                  );
-                })
-              }
-              </List>
-            </Paper>
-          )
-        }
-        {
-          (this.state.searchResults.length === 0 && this.state.showSearch) && (
-            <Paper elevation={4} className="search-results">
-              <ListItem>
-                <ListItemText primary={this.props.t('No results')}></ListItemText>
-              </ListItem>
-            </Paper>
-          )
-        }
+        <ClickAwayListener onClickAway={this.hideSearchResults}>
+          <div className="search-container">
+            <FormControl fullWidth>
+              <SearchTextField
+                id="outlined-adornment-search-devices"
+                labeltext={this.props.t('Search your device')}
+                value={this.state.query}
+                onChange={this.search}
+                onClick={this.search}
+              />
+            </FormControl>
+            {
+              this.state.showSearch && (
+                <Paper elevation={4} className="search-results">
+                  <List>
+                  {
+                    this.state.searchResults.map((res, index) => {
+                      return (
+                        <ListItem
+                          key={res}
+                          button
+                          onClick={() => this.selectDevice(res)}
+                        >
+                          <ListItemText primary={
+                            <div>
+                              {res}
+                            </div>
+                          } />
+                        </ListItem>
+                      );
+                    })
+                  }
+                  </List>
+                </Paper>
+              )
+            }
+            {
+              (this.state.searchResults.length === 0 && this.state.showSearch) && (
+                <Paper elevation={4} className="search-results">
+                  <ListItem>
+                    <ListItemText primary={this.props.t('No results')}></ListItemText>
+                  </ListItem>
+                </Paper>
+              )
+            }
+          </div>
+        </ClickAwayListener>
         {
           this.state.showDeviceData && !this.state.deviceLoaded && (
             <>
+              <br />
               { notLoaded }
             </>
           )
@@ -223,7 +268,52 @@ class Home extends React.Component {
         {
           this.state.showDeviceData && this.state.deviceLoaded && (
             <>
+            { warning432 }
             <br />
+            <Grid container className="device-info">
+              <Grid item xs>
+                <b>Name: </b> {this.state.device['title']}
+              </Grid>
+              <Grid item xs>
+                <b>Target: </b> {this.state.device['target']}
+              </Grid>
+              <Grid item xs>
+                <b>Subtarget: </b> {this.state.device['subtarget']}
+              </Grid>
+              <Grid item xs>
+                <b>Image Size: </b> {this.state.device['image_size']}
+              </Grid>
+            </Grid>
+            <ExpansionPanel elevation={0} className="advanced-settings">
+              <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1a-content"
+                id="panel1a-header"
+              >
+                <Typography>Customize Packages (<WarningIcon className="icon" /> for advanced users)</Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails className="options">
+                <FormGroup row>
+                {
+                  this.packages.map((package_name, i) => {
+                    return (
+                      <FormControlLabel 
+                        key={i}
+                        control={
+                          <Checkbox
+                            onChange={(event) => this.packageSettingChange(event, package_name)}
+                            value={this.state.packages[package_name]}
+                            checked={this.state.packages[package_name]}
+                          />
+                        }
+                        label={package_name}
+                      />
+                    )
+                  })
+                }
+                </FormGroup>
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
             {
               this.state.device.images.map((image, i) => {
                 return (
@@ -253,7 +343,7 @@ class Home extends React.Component {
       </>
     );
     return (
-      <Container className="home-container" onClick={this.toggleSearchIfIntended}>
+      <Container className="home-container">
         <Paper className="home-container-paper">
           { this.state.devicesLoaded ? onLoad : notLoaded }
         </Paper>

@@ -1,68 +1,108 @@
 .home-container {
-    margin-top: 30px;
-    .home-container-paper {
-        padding: 30px;
-        text-align: left;
-        .warning-432 {
-            background-color: #f0f0f0;
-            padding: 10px;
-            margin-top: 20px;
-            border: 1px solid #e3e3e3;
-            color: #666;
-            .icon {
-                margin: 0 20px 0 10px;
-                color: #F9A825
-            }
-        }
-        .device-info {
-            margin-bottom: 15px;
-        }
-        .search-label {
-            background-color: #fff;
-            padding: 0 10px;
-            position: absolute;
-            white-space: nowrap;
-        }
-        .search-results {
-            position: absolute;
-            z-index: 10;
-        }
-        .MuiTypography-h4 {
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .download-button {
-            margin-right: 10px;
-            .download-icon {
-                margin-right: 10px;
-            }
-        }
-        .advanced-settings {
-            border: 1px solid #999;
-            background-color: #f0f0f0;
-            border-radius: 6px;
-            margin-top: 20px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            .icon {
-                font-size: 1em;
-                vertical-align: text-top;
-            }
-            .options {
-                padding-top: 30px;
-                background-color: #fff;
-            }
-        }
+  margin-top: 30px;
+
+  .home-container-paper {
+    padding: 30px;
+    text-align: left;
+
+    .warning-432 {
+      background-color: #f0f0f0;
+      padding: 10px;
+      margin-top: 20px;
+      border: 1px solid #e3e3e3;
+      color: #666;
+
+      .icon {
+        margin: 0 20px 0 10px;
+        color: #F9A825
+      }
     }
+
+    .device-info {
+      margin-bottom: 15px;
+    }
+
+    .search-label {
+      background-color: #fff;
+      padding: 0 10px;
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .search-results {
+      position: absolute;
+      z-index: 10;
+    }
+
+    .MuiTypography-h4 {
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .download-button {
+      margin-right: 10px;
+
+      .download-icon {
+        margin-right: 10px;
+      }
+    }
+
+    .interface-switch-bar {
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      background-color: #fff;
+      z-index: 9;
+      overflow: hidden;
+      .interface-switch {
+        color: #000;
+      }
+      .advanced-settings {
+        border: 1px solid #999;
+        background-color: #f0f0f0;
+        border-radius: 6px;
+        margin-top: 20px;
+        overflow: hidden;
+        margin-bottom: 20px;
+
+        .icon {
+          font-size: 1em;
+          vertical-align: text-top;
+        }
+
+        .options {
+          padding-top: 30px;
+          background-color: #fff;
+        }
+
+        .package {
+          padding-right: 15px;
+          padding-left: 5px;
+          border-radius: 30px;
+          user-select: none;
+        }
+
+        .package:hover {
+          background-color: #f0f0f0;
+        }
+
+        .package:focus, .package:active {
+          transition: .2s;
+          background-color: darken(#f0f0f0, 15%);
+        }
+      }
+    }
+  }
 }
 
 .device-table {
-	margin-top: 20px;
-    width: 100%;
-    td {
-        padding: 20px 30px;
-    }
-    tr:nth-child(odd) {
-        background-color: rgba(104, 74, 238, 0.07);
-    }
+  margin-top: 20px;
+  width: 100%;
+
+  td {
+    padding: 20px 30px;
+  }
+
+  tr:nth-child(odd) {
+    background-color: rgba(104, 74, 238, 0.07);
+  }
 }

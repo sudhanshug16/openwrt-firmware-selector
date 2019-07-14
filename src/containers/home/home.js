@@ -2,7 +2,7 @@ import React from 'react';
 import {
   AppBar,
   Button,
-  Checkbox,
+  Chip,
   CircularProgress,
   ClickAwayListener,
   Container,
@@ -12,9 +12,8 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  FormControlLabel,
-  FormGroup,
   Grid,
+  Input,
   InputAdornment,
   List,
   ListItem,
@@ -23,6 +22,7 @@ import {
   Tab,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from '@material-ui/core';
 import {fade, makeStyles} from '@material-ui/core/styles';
@@ -116,25 +116,6 @@ function AlertDialog({open, handleClose, text, title, t}) {
 
 class Home extends React.Component {
 
-  deviceNames = [];
-  deviceNamesID = {};
-  state = {
-    showDeviceData: false,
-    device: {},
-    deviceLoaded: false,
-    devices: [],
-    devicesLoaded: false,
-    searchResults: [],
-    showSearch: false,
-    selectedSearchIndex: 0,
-    query: '',
-    downloading: false,
-    packages: {},
-    release_version_number: '',
-  };
-  fuzzySet;
-  basicInterface = 0;
-  confirmingBuild = false;
   packages = [
     'opkg',
     'ip6tables',
@@ -163,6 +144,26 @@ class Home extends React.Component {
     'iptables',
     'firewall',
     'luci'];
+  deviceNames = [];
+  deviceNamesID = {};
+  state = {
+    showDeviceData: false,
+    device: {},
+    deviceLoaded: false,
+    devices: [],
+    devicesLoaded: false,
+    searchResults: [],
+    showSearch: false,
+    selectedSearchIndex: 0,
+    query: '',
+    downloading: false,
+    packages: this.packages,
+    release_version_number: '',
+    packageName: '',
+  };
+  fuzzySet;
+  basicInterface = 0;
+  confirmingBuild = false;
 
   getDevicesData = () => fetch(
       'https://chef.libremesh.org/download/json/devices.json')
@@ -184,13 +185,6 @@ class Home extends React.Component {
         devicesLoaded: true,
         release_version_number: data['version_number'],
       });
-    });
-    let packages = {};
-    this.packages.forEach((package_name) => {
-      packages[package_name] = true;
-    });
-    this.setState({
-      packages,
     });
   }
 
@@ -242,14 +236,6 @@ class Home extends React.Component {
     this.basicInterface = val;
   };
 
-  packageSettingChange = (event, package_name) => {
-    let packages = this.state.packages;
-    packages[package_name] = event.target.checked;
-    this.setState({
-      packages,
-    });
-  };
-
   downloadingImageIndicatorShow = (i) => {
     this.setState({
       downloading: true,
@@ -259,6 +245,37 @@ class Home extends React.Component {
         downloading: false,
       });
     }, 1000);
+  };
+
+  changeAddPackageInput = (event) => {
+    this.setState({
+      packageName: event.target.value,
+    });
+  };
+
+  deletePackage = (i) => {
+    let packages = this.state.packages;
+    packages.splice(i, 1);
+    this.setState({
+      packages,
+    });
+  };
+
+  addPackage = (event) => {
+    if ((event.which || event.keyCode) === 13 && !event.shiftKey) {
+      let packages = this.state.packages;
+      const packageArray = this.state.packageName.split(/[,\n]+/);
+      packageArray.forEach((package_name) => {
+        package_name = package_name.replace(' ', '');
+        if (package_name !== '') {
+          packages.push(package_name);
+        }
+      });
+      this.setState({
+        packages,
+        packageName: '',
+      });
+    }
   };
 
   closeConfirmBuildDialog = (v) => {
@@ -419,34 +436,39 @@ class Home extends React.Component {
                         </TabContainer>
                     ) : (
                         <TabContainer>
-                          <FormGroup row>
-                            {
-                              this.packages.map((package_name, i) => {
-                                return (
-                                    <FormControlLabel
-                                        className="package"
-                                        key={i}
-                                        control={
-                                          <Checkbox
-                                              onChange={(event) => this.packageSettingChange(
-                                                  event, package_name)}
-                                              value={this.state.packages[package_name]}
-                                              checked={this.state.packages[package_name]}
-                                          />
-                                        }
-                                        label={package_name}
-                                    />
-                                );
-                              })
-                            }
-                          </FormGroup>
-                          <br/>
-                          <Button variant="outlined" color="primary"
-                                  onClick={this.openConfirmBuildDialog}>
-                            <BuildIcon/>
-                            &nbsp;
-                            {this.props.t('Build')}
-                          </Button>
+                          <Paper elevation={0} className="package-list-input">
+                            <div>
+                              {
+                                this.state.packages.map((package_name, i) => {
+                                  return (
+                                      <Chip className="package"
+                                            key={package_name + i}
+                                            onDelete={() => this.deletePackage(
+                                                i)}
+                                            label={package_name}
+                                      />
+                                  );
+                                })
+                              }
+                              <Tooltip
+                                  title={<span>Use comma or new line separated array.  <br/>Press enter to apply.</span>}>
+                                <Input
+                                    multiline
+                                    value={this.state.packageName}
+                                    onKeyUp={this.addPackage}
+                                    onChange={this.changeAddPackageInput}
+                                    placeholder={this.props.t('Add package(s)')}
+                                />
+                              </Tooltip>
+                            </div>
+                            <br/>
+                            <Button variant="outlined" color="primary"
+                                    onClick={this.openConfirmBuildDialog}>
+                              <BuildIcon/>
+                              &nbsp;
+                              {this.props.t('Build')}
+                            </Button>
+                          </Paper>
                         </TabContainer>
                     )
                   }

@@ -39,46 +39,46 @@ export default function Header() {
   const id = open ? 'simple-popper' : undefined;
 
   return (
-      <AppBar position="static">
-        <Toolbar>
-          <Typography edge="start" variant="h6">{t(
-              'OpenWrt Firmware Selector Wizard')}</Typography>
-          <div style={{flexGrow: 1}} />
-          <Button aria-describedby={id} color="secondary" variant="contained"
-                  onClick={openChangeLanguagePopper} href="#">
-            {t('Change Language')} &nbsp;
-            <LanguageIcon/>
-          </Button>
-          <Popper
-              id={id}
-              open={open}
-              anchorEl={anchorEl}
-              transition
-              disablePortal={true}
-          >
-            {({TransitionProps}) => (
-                <Fade {...TransitionProps} timeout={350}>
-                  <Paper className="language-selector-popper">
-                    <FormControl component="fieldset">
-                      <FormLabel component="legend">Change Language</FormLabel>
-                      <br/>
-                      <RadioGroup
-                          aria-label="Language"
-                          name="language"
-                          value={value}
-                          onChange={changeLanguage}
-                      >
-                        <FormControlLabel value="en" control={<Radio/>}
-                                          label={t('English')}/>
-                        <FormControlLabel value="de" control={<Radio/>}
-                                          label={t('German')}/>
-                      </RadioGroup>
-                    </FormControl>
-                  </Paper>
-                </Fade>
-            )}
-          </Popper>
-        </Toolbar>
-      </AppBar>
+    <AppBar position="static">
+      <Toolbar>
+        <Typography edge="start" variant="h6">{t(
+          'OpenWrt Firmware Selector Wizard')}</Typography>
+        <div style={{flexGrow: 1}} />
+        <Button aria-describedby={id} color="secondary" variant="contained"
+          onClick={openChangeLanguagePopper} href="#">
+          {t('Change Language')} &nbsp;
+          <LanguageIcon/>
+        </Button>
+        <Popper
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          transition
+          disablePortal={true}
+        >
+          {({TransitionProps}) => (
+            <Fade {...TransitionProps} timeout={350}>
+              <Paper className="language-selector-popper">
+                <FormControl component="fieldset">
+                  <FormLabel component="legend">Change Language</FormLabel>
+                  <br/>
+                  <RadioGroup
+                    aria-label="Language"
+                    name="language"
+                    value={value}
+                    onChange={changeLanguage}
+                  >
+                    <FormControlLabel value="en" control={<Radio/>}
+                      label={t('English')}/>
+                    <FormControlLabel value="de" control={<Radio/>}
+                      label={t('German')}/>
+                  </RadioGroup>
+                </FormControl>
+              </Paper>
+            </Fade>
+          )}
+        </Popper>
+      </Toolbar>
+    </AppBar>
   );
 }

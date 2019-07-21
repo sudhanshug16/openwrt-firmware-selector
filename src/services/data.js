@@ -3,17 +3,18 @@ import axios from 'axios';
 const base = 'https://cors-anywhere.herokuapp.com/https://mwarning.de/misc/json/bin';
 
 class DataService {
+
   getDevicesData = axios.get(
-      `${base}/overview.json`)
-      .then(res => res.data);
+    `${base}/overview.json`)
+    .then(res => res.data);
 
   getDeviceData = (device_id) => axios.get(
-      base + '/targets/' + device_id)
-      .then(res => res.data);
+    base + '/targets/' + device_id)
+    .then(res => res.data);
 
   getDistributions = axios.get(
-      'https://chef.libremesh.org/api/distributions')
-      .then(res => res.data);
+    'https://chef.libremesh.org/api/distributions')
+    .then(res => res.data);
 
   buildImage = (board, packages, target, version) => {
     return axios.post('https://chef.libremesh.org/api/build-request', {
@@ -34,7 +35,7 @@ class DataService {
       response.isBuilt = res.status === 202 && res.data.files !== undefined;
       response.status = res.status;
       if (response.isBuilt) {
-        response = {...response, data: res.data}
+        response = {...response, data: res.data};
       }
     });
     return response;

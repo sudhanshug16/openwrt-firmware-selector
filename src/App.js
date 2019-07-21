@@ -22,21 +22,21 @@ const theme = createMuiTheme({
 
 function App() {
   return (
-      <ThemeProvider theme={theme}>
-        <Suspense fallback={
-          <LinearProgress/>
-        }>
-          <div className="App">
-            <Header/>
-            <Router>
-              <Switch>
-                <Route path="" component={Home}/>
-                <Route default component={NotFound}/>
-              </Switch>
-            </Router>
-          </div>
-        </Suspense>
-      </ThemeProvider>
+    <ThemeProvider theme={theme}>
+      <Suspense fallback={
+        <LinearProgress/>
+      }>
+        <div className="App">
+          <Header/>
+          <Router>
+            <Switch>
+              <Route path="" component={Home}/>
+              <Route default component={NotFound}/>
+            </Switch>
+          </Router>
+        </div>
+      </Suspense>
+    </ThemeProvider>
   );
 }
 

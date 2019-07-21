@@ -22,16 +22,38 @@
       margin-bottom: 15px;
     }
 
-    .search-label {
-      background-color: #fff;
-      padding: 0 10px;
-      position: absolute;
-      white-space: nowrap;
+    .version-select {
+      width: 200px;
+
+      .version-label {
+        background-color: inherit;
+        padding: 5px;
+        margin-top: -10px;
+        margin-left: 10px;
+        display: block;
+        z-index: 10;
+      }
     }
 
-    .search-results {
-      position: absolute;
-      z-index: 10;
+    .search-field {
+      width: calc(100% - 220px);
+      margin-left: 20px;
+      position: relative;
+
+      .search-label {
+        background-color: #fff;
+        padding: 0 10px;
+        position: absolute;
+        white-space: nowrap;
+      }
+
+      .search-results {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        top: 100%;
+        z-index: 10;
+      }
     }
 
     .MuiTypography-h4 {

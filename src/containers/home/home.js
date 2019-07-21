@@ -13,12 +13,19 @@ import {
   DialogTitle,
   FormControl,
   Grid,
+  IconButton,
   Input,
   InputAdornment,
+  InputLabel,
   List,
   ListItem,
   ListItemText,
+  MenuItem,
+  OutlinedInput,
   Paper,
+  Select,
+  Snackbar,
+  SnackbarContent,
   Tab,
   Tabs,
   TextField,
@@ -31,9 +38,15 @@ import SearchIcon from '@material-ui/icons/Search';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import WarningIcon from '@material-ui/icons/Warning';
 import BuildIcon from '@material-ui/icons/Build';
+import CloseIcon from '@material-ui/icons/Close';
+import ErrorIcon from '@material-ui/icons/Error';
 import './home.scss';
 import {withTranslation} from 'react-i18next';
 import FuzzySet from 'fuzzyset.js';
+
+import DataService from '../../services/data';
+
+const buildStatusCheckInterval = 5000;
 
 const useStylesSearch = makeStyles(theme => ({
   root: {
@@ -53,6 +66,56 @@ const useStylesSearch = makeStyles(theme => ({
   },
   focused: {},
 }));
+
+const SnackBarStyles = makeStyles(theme => ({
+  error: {
+    backgroundColor: theme.palette.error.dark,
+  },
+  message: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: '20px',
+    fontSize: 20,
+  },
+}));
+
+function ErrorSnackBar({open, closeHandle, errorMessage}) {
+  const classes = SnackBarStyles();
+  return (
+      <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={open}
+          autoHideDuration={6000}
+          onClose={closeHandle}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+      >
+        <SnackbarContent
+            className={classes.error}
+            aria-describedby="client-snackbar"
+            message={
+              <span id="client-snackbar" className={classes.message}>
+                <ErrorIcon className={classes.icon}/>
+                {errorMessage ||
+                'An unexpected error occurred. Please try again'}
+              </span>
+            }
+            action={[
+              <IconButton key="close" aria-label="Close" color="inherit"
+                          onClick={closeHandle}>
+                <CloseIcon/>
+              </IconButton>,
+            ]}
+        />
+      </Snackbar>
+  );
+}
 
 function SearchTextField(props) {
   const classes = useStylesSearch();
@@ -86,28 +149,28 @@ function TabContainer({children, dir}) {
   );
 }
 
-function AlertDialog({open, handleClose, text, title, t}) {
+function AlertDialog({open, cancelHandler, acceptHandler, text, title, cancelComponent, acceptComponent}) {
   return (
       <Dialog
           open={open}
-          onClose={() => handleClose(-1)}
+          onClose={cancelHandler}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
       >
         <DialogTitle
-            id="alert-dialog-title">{t(title)}</DialogTitle>
+            id="alert-dialog-title">{title}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {t(text)}
+            {text}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleClose(1)} color="primary">
-            {t('Build')} &nbsp; <BuildIcon/>
+          <Button onClick={acceptHandler} color="primary">
+            {acceptComponent}
           </Button>
-          <Button onClick={() => handleClose(0)} color="secondary"
+          <Button onClick={cancelHandler} color="secondary"
                   variant="contained" autoFocus>
-            {t('Cancel')}
+            {cancelComponent}
           </Button>
         </DialogActions>
       </Dialog>
@@ -146,6 +209,7 @@ class Home extends React.Component {
     'luci'];
   deviceNames = [];
   deviceNamesID = {};
+  checkBuildStatus;
   state = {
     showDeviceData: false,
     device: {},
@@ -158,35 +222,58 @@ class Home extends React.Component {
     query: '',
     downloading: false,
     packages: this.packages,
-    release_version_number: '',
+    distributions: {
+      versions: {},
+    },
+    configChanged: true,
     packageName: '',
+    release: '',
+    builtImages: [],
+    isBuilding: false,
+    showUnexpectedErrorBar: false,
   };
+
   fuzzySet;
   basicInterface = 0;
   confirmingBuild = false;
 
-  getDevicesData = () => fetch(
-      'https://chef.libremesh.org/download/json/devices.json')
-      .then(res => res.json());
-  getDeviceData = (device_id) => fetch(
-      'https://chef.libremesh.org/download/json/' + device_id + '.json')
-      .then(res => res.json());
+  dataService = new DataService();
 
   componentDidMount() {
-    this.getDevicesData().then(data => {
-      Object.keys(data['devices']).forEach((device_id) => {
-        const device_name = data['devices'][device_id];
-        this.deviceNames.push(device_name);
-        this.deviceNamesID[device_name] = device_id;
-      });
-      this.fuzzySet = FuzzySet(this.deviceNames);
+    this.dataService.getDistributions.then(distros => {
       this.setState({
-        devices: data['devices'],
-        devicesLoaded: true,
-        release_version_number: data['version_number'],
+        distributions: distros['openwrt'],
+        release: distros['openwrt']['latest'],
+      });
+      this.dataService.getDevicesData.then(data => {
+        Object.keys(data['devices']).forEach((device_name) => {
+          // const device_name = data['devices'][device_id];
+          // this.deviceNames.push(device_name);
+          // this.deviceNamesID[device_name] = device_id;
+          const device_id = data['devices'][device_name];
+          this.deviceNames.push(device_name);
+          this.deviceNamesID[device_name] = device_id;
+        });
+        this.fuzzySet = FuzzySet(this.deviceNames);
+        this.setState({
+          devices: data['devices'],
+          devicesLoaded: true,
+        });
       });
     });
   }
+
+  closeUnexpectedErrorBar = () => {
+    this.setState({
+      showUnexpectedErrorBar: false,
+    });
+  };
+
+  setRelease = (event) => {
+    this.setState({
+      release: event.target.value,
+    });
+  };
 
   selectDevice = (device_name) => {
     if (device_name != null) {
@@ -197,7 +284,7 @@ class Home extends React.Component {
         query: device_name,
         deviceLoaded: false,
       });
-      this.getDeviceData(device_id).then(data => {
+      this.dataService.getDeviceData(device_id).then(data => {
         this.setState({
           device: data,
           deviceLoaded: true,
@@ -244,7 +331,7 @@ class Home extends React.Component {
       this.setState({
         downloading: false,
       });
-    }, 1000);
+    }, 2000);
   };
 
   changeAddPackageInput = (event) => {
@@ -258,6 +345,7 @@ class Home extends React.Component {
     packages.splice(i, 1);
     this.setState({
       packages,
+      configChanged: true
     });
   };
 
@@ -274,17 +362,95 @@ class Home extends React.Component {
       this.setState({
         packages,
         packageName: '',
+        configChanged: true
       });
     }
   };
 
   closeConfirmBuildDialog = (v) => {
     this.confirmingBuild = false;
-    console.log(v);
   };
 
   openConfirmBuildDialog = () => {
     this.confirmingBuild = true;
+  };
+
+  displayBuiltImageData = async (buildStatusResponse) => {
+    console.log(buildStatusResponse);
+    await this.dataService.getFiles(buildStatusResponse.data.files)
+        .then((fileListResponse) => {
+          let builtImages = [];
+          fileListResponse.forEach((file) => {
+            const suffix = file.name.substring(file.name.length - 4);
+            if (suffix === '.bin') {
+              const type = file.name.split('-').reverse()[0].split('.')[0];
+              builtImages.push({
+                url: 'https://chef.libremesh.org' +
+                    buildStatusResponse.data.files + file.name,
+                type,
+              });
+            }
+          });
+          this.setState({
+            builtImages,
+            configChanged: false,
+            isBuilding: false,
+          });
+        });
+    clearTimeout(this.checkBuildStatus);
+  };
+
+  buildImageCheck = async (request_hash) => {
+    const buildStatusResponse = await this.dataService.buildStatusCheck(
+        request_hash);
+    if (buildStatusResponse.status === 202) {
+      this.checkBuildStatus = setTimeout(
+          () => {
+            this.buildImageCheck(request_hash);
+          }, buildStatusCheckInterval,
+      );
+    } else if (buildStatusResponse.status === 200) {
+      await this.displayBuiltImageData(buildStatusResponse);
+    } else {
+      this.setState({
+        isBuilding: false,
+        showUnexpectedErrorBar: true,
+      });
+    }
+  };
+
+  buildImage = async () => {
+    this.closeConfirmBuildDialog();
+    const board = this.state.device.id;
+    const packages = this.state.packages;
+    const target = this.state.device.target + '/' + this.state.device.subtarget;
+    const version = this.state.release;
+    this.setState({
+      isBuilding: true,
+      builtImages: [],
+    });
+    this.dataService.buildImage(board, packages, target, version).then(async res => {
+      if (res.status === 202 && res.data['request_hash'] !== undefined) {
+        const request_hash = res.data['request_hash'];
+        this.checkBuildStatus = setTimeout(
+            async () => {
+              await this.buildImageCheck(request_hash);
+            }, buildStatusCheckInterval,
+        );
+      } else if (res.status === 200) {
+        await this.displayBuiltImageData(res);
+      } else {
+        this.setState({
+          isBuilding: false,
+          showUnexpectedErrorBar: true,
+        });
+      }
+    }).catch(() => {
+      this.setState({
+        isBuilding: false,
+        showUnexpectedErrorBar: true,
+      });
+    });
   };
 
   render() {
@@ -323,7 +489,28 @@ class Home extends React.Component {
           <br/>
           <ClickAwayListener onClickAway={this.hideSearchResults}>
             <div className="search-container">
-              <FormControl fullWidth>
+              <FormControl className="version-select">
+                <InputLabel htmlFor="version-select" className="version-label">
+                  {this.props.t('Version')}
+                </InputLabel>
+                <Select
+                    value={this.state.release}
+                    onChange={this.setRelease}
+                    input={<OutlinedInput name="version"
+                                          id="version-select" labelWidth={60}/>}
+                >
+                  {
+                    Object.keys(this.state.distributions['versions'])
+                        .map((version) => (
+                                <MenuItem value={version} key={version}>
+                                  <em>{version}</em>
+                                </MenuItem>
+                            ),
+                        )
+                  }
+                </Select>
+              </FormControl>
+              <FormControl className="search-field">
                 <SearchTextField
                     id="outlined-adornment-search-devices"
                     labeltext={this.props.t('Search your device')}
@@ -331,43 +518,44 @@ class Home extends React.Component {
                     onChange={this.search}
                     onClick={this.search}
                 />
+                {
+                  this.state.showSearch && this.state.searchResults.length !==
+                  0 && (
+                      <Paper elevation={4} className="search-results">
+                        <List>
+                          {
+                            this.state.searchResults.map((res, index) => {
+                              return (
+                                  <ListItem
+                                      key={res}
+                                      button
+                                      onClick={() => this.selectDevice(res)}
+                                  >
+                                    <ListItemText primary={
+                                      <div>
+                                        {res}
+                                      </div>
+                                    }/>
+                                  </ListItem>
+                              );
+                            })
+                          }
+                        </List>
+                      </Paper>
+                  )
+                }
+                {
+                  (this.state.searchResults.length === 0 &&
+                      this.state.showSearch) && (
+                      <Paper elevation={4} className="search-results">
+                        <ListItem>
+                          <ListItemText
+                              primary={this.props.t('No results')}/>
+                        </ListItem>
+                      </Paper>
+                  )
+                }
               </FormControl>
-              {
-                this.state.showSearch && (
-                    <Paper elevation={4} className="search-results">
-                      <List>
-                        {
-                          this.state.searchResults.map((res, index) => {
-                            return (
-                                <ListItem
-                                    key={res}
-                                    button
-                                    onClick={() => this.selectDevice(res)}
-                                >
-                                  <ListItemText primary={
-                                    <div>
-                                      {res}
-                                    </div>
-                                  }/>
-                                </ListItem>
-                            );
-                          })
-                        }
-                      </List>
-                    </Paper>
-                )
-              }
-              {
-                (this.state.searchResults.length === 0 &&
-                    this.state.showSearch) && (
-                    <Paper elevation={4} className="search-results">
-                      <ListItem>
-                        <ListItemText
-                            primary={this.props.t('No results')}/>
-                      </ListItem>
-                    </Paper>
-                )
-              }
             </div>
           </ClickAwayListener>
           {
@@ -443,6 +631,7 @@ class Home extends React.Component {
                                   return (
                                       <Chip className="package"
                                             key={package_name + i}
+                                            size="small"
                                             onDelete={() => this.deletePackage(
                                                 i)}
                                             label={package_name}
@@ -462,12 +651,49 @@ class Home extends React.Component {
                               </Tooltip>
                             </div>
                             <br/>
-                            <Button variant="outlined" color="primary"
-                                    onClick={this.openConfirmBuildDialog}>
-                              <BuildIcon/>
-                              &nbsp;
-                              {this.props.t('Build')}
-                            </Button>
+                            {
+                              this.state.configChanged && !this.state.isBuilding && (
+                                  <Button variant="outlined" color="primary"
+                                          onClick={this.openConfirmBuildDialog}>
+                                    <BuildIcon/>
+                                    &nbsp;
+                                    {this.props.t('Build')}
+                                  </Button>
+                              )
+                            }
+                            {
+                              this.state.isBuilding && (
+                                  <CircularProgress size={20}/>
+                              )
+                            }
+                            {
+                              this.state.builtImages.length > 0 && !this.state.configChanged && (
+                                  <>
+                                    {
+                                      this.state.builtImages.map((image) => (
+                                          <Button
+                                              key={image.url}
+                                              className="download-button"
+                                              href={image.url}
+                                              color="primary"
+                                              variant="contained"
+                                              onClick={() => this.downloadingImageIndicatorShow()}
+                                          >
+                                            <CloudDownloadIcon
+                                                className="download-icon"/>
+                                            {image.type}
+                                          </Button>
+                                      ))
+                                    }
+                                    &nbsp;
+                                    {
+                                      this.state.downloading && (
+                                          <CircularProgress size={20}/>
+                                      )
+                                    }
+                                  </>
+                              )
+                            }
                           </Paper>
                         </TabContainer>
                     )
@@ -478,16 +704,32 @@ class Home extends React.Component {
         </>
     );
     return (
-        <Container className="home-container">
-          <Paper className="home-container-paper">
-            <AlertDialog handleClose={this.closeConfirmBuildDialog}
-                         open={this.confirmingBuild}
-                         text="Building image requires computation resources, so we would request you to check if this selection is what you want"
-                         title="Please confirm that you want to perform this action"
-                         t={this.props.t}/>
-            {this.state.devicesLoaded ? onLoad : notLoaded}
-          </Paper>
-        </Container>
+        <>
+          <ErrorSnackBar
+              open={this.state.showUnexpectedErrorBar}
+              closeHandle={this.closeUnexpectedErrorBar}
+          />
+          <AlertDialog
+              cancelHandler={this.closeConfirmBuildDialog}
+              acceptHandler={this.buildImage}
+              open={this.confirmingBuild}
+              text={this.props.t(
+                  'Building image requires computation resources, so we would request you to check if this selection is what you want')}
+              title={this.props.t(
+                  'Please confirm that you want to perform this action')}
+              cancelComponent={this.props.t('Cancel')}
+              acceptComponent={
+                <>
+                  {this.props.t('Build')} &nbsp; <BuildIcon/>
+                </>
+              }
+          />
+          <Container className="home-container">
+            <Paper className="home-container-paper">
+              {this.state.devicesLoaded ? onLoad : notLoaded}
+            </Paper>
+          </Container>
+        </>
     );
   }
 }

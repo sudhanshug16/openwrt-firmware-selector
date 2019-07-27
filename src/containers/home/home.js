@@ -47,7 +47,7 @@ function TabContainer({children, dir}) {
 }
 
 TabContainer.propTypes = {
-  children: PropTypes.elementType,
+  children: PropTypes.any,
   dir: PropTypes.any,
 };
 
@@ -250,13 +250,16 @@ class Home extends React.Component {
   };
 
   displayBuiltImageData = async (buildStatusResponse) => {
-    console.log(buildStatusResponse);
+    let builtImages = [];
+    builtImages.push({
+      url: 'https://chef.libremesh.org' +
+          buildStatusResponse.data.files + buildStatusResponse.data.sysupgrade,
+      type: 'sysupgrade',
+    });
     await this.dataService.getFiles(buildStatusResponse.data.files)
       .then((fileListResponse) => {
-        let builtImages = [];
         fileListResponse.forEach((file) => {
-          const suffix = file.name.substring(file.name.length - 4);
-          if (suffix === '.bin') {
+          if (file.name.includes('factory')) {
             const type = file.name.split('-').reverse()[0].split('.')[0];
             builtImages.push({
               url: 'https://chef.libremesh.org' +
@@ -484,7 +487,7 @@ class Home extends React.Component {
                               >
                                 <CloudDownloadIcon
                                   className="download-icon"/>
-                                {image.type}
+                                {image.name.split('-').reverse()[0].split('.')[0]}
                               </Button>
                             );
                           })

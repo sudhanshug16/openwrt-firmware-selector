@@ -60,7 +60,7 @@ function ErrorSnackBar({open, closeHandle, errorMessage}) {
 }
 
 ErrorSnackBar.propTypes = {
-  open: PropTypes.boolean,
+  open: PropTypes.bool,
   closeHandle: PropTypes.func,
   errorMessage: PropTypes.string,
 };

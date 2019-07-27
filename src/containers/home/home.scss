@@ -1,3 +1,5 @@
+$bg-color: #f0f0f0;
+
 .home-container {
   margin-top: 30px;
 
@@ -6,7 +8,7 @@
     text-align: left;
 
     .warning-432 {
-      background-color: #f0f0f0;
+      background-color: $bg-color;
       padding: 10px;
       margin-top: 20px;
       border: 1px solid #e3e3e3;
@@ -33,6 +35,12 @@
         display: block;
         z-index: 10;
       }
+
+      @media all and (max-width: 820px) {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
     }
 
     .search-field {
@@ -53,6 +61,12 @@
         width: 100%;
         top: 100%;
         z-index: 10;
+      }
+
+      @media all and (max-width: 820px) {
+        width: 100%;
+        margin: 20px 0 0;
+        padding: 0;
       }
     }
 
@@ -82,7 +96,7 @@
 
       .advanced-settings {
         border: 1px solid #999;
-        background-color: #f0f0f0;
+        background-color: $bg-color;
         border-radius: 6px;
         margin-top: 20px;
         overflow: hidden;
@@ -109,12 +123,12 @@
       }
 
       .package:hover {
-        background-color: #f0f0f0;
+        background-color: $bg-color;
       }
 
       .package:focus, .package:active {
         transition: .2s;
-        background-color: darken(#f0f0f0, 15%);
+        background-color: darken($bg-color, 15%);
       }
     }
   }

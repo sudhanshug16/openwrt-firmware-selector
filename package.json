@@ -27,9 +27,6 @@
     "deploy": "gh-pages -d build",
     "lint": "eslint src/ --ext .js --fix"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",

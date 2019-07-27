@@ -15,6 +15,7 @@
     "Build": "Build",
     "Cancel": "Cancel",
     "Add package(s)": "Add package(s)",
+    "Version": "Version",
     "Please confirm that you want to perform this action": "Please confirm that you want to perform this action",
     "Building image requires computation resources, so we would request you to check if this selection is what you want": "Building image requires computation resources, so we would request you to check if this selection is what you want",
     "Devices with ≤4MB flash and/or ≤32MB ram will work but they will be very limited (usually they can't install or run additional packages) because they have low RAM and flash space. Consider this when choosing a device to buy, or when deciding to flash OpenWrt on your device because it is listed as supported.": "Devices with ≤4MB flash and/or ≤32MB ram will work but they will be very limited (usually they can't install or run additional packages) because they have low RAM and flash space. Consider this when choosing a device to buy, or when deciding to flash OpenWrt on your device because it is listed as supported.",

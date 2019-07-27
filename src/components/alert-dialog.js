@@ -38,13 +38,13 @@ function AlertDialog({open, cancelHandler, acceptHandler, text, title, cancelCom
 }
 
 AlertDialog.propTypes = {
-  open: PropTypes.boolean,
+  open: PropTypes.bool,
   cancelHandler: PropTypes.func,
   acceptHandler: PropTypes.func,
   text: PropTypes.string,
   title: PropTypes.string,
   cancelComponent: PropTypes.elementType,
-  acceptComponent: PropTypes.elementType,
+  acceptComponent: PropTypes.object,
 };
 
 export default AlertDialog;

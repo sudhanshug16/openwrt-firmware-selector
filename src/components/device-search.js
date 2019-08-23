@@ -34,6 +34,7 @@ function SearchTextField(props) {
           {props.labeltext}
         </div>
       }
+      disabled={props.disabled}
       InputProps={
         {
           classes,
@@ -49,6 +50,7 @@ function SearchTextField(props) {
 
 SearchTextField.propTypes = {
   labeltext: PropTypes.string,
+  disabled: PropTypes.bool,
 };
 
 export default SearchTextField;

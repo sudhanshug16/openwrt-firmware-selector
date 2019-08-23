@@ -1,23 +1,21 @@
 import axios from 'axios';
 
-const base = 'https://cors-anywhere.herokuapp.com/https://mwarning.de/misc/json/bin';
+const base_downloads = 'https://cors-anywhere.herokuapp.com/https://aparcar.stephen304.com/download/json-demo/openwrt/';
+const base_api = 'https://cors-anywhere.herokuapp.com/https://aparcar.stephen304.com/api/';
 
 class DataService {
 
-  getDevicesData = axios.get(
-    `${base}/overview.json`)
-    .then(res => res.data);
+  getVersions = () => axios.get(base_downloads + 'versions.json');
+  
+  getOverview = (path) => axios.get(base_downloads + path + '/overview.json');
 
-  getDeviceData = (device_id) => axios.get(
-    base + '/targets/' + device_id)
-    .then(res => res.data);
+  getDeviceData = (device_path) => axios.get(base_downloads + device_path);
 
-  getDistributions = axios.get(
-    'https://chef.libremesh.org/api/distributions')
-    .then(res => res.data);
+  getDevicePackages = (version, target, profile) => axios.get(base_api + 'packages_image?distro=openwrt&version=' + version.toLowerCase() + '&target=' + target + '&profile=' + profile.toLowerCase());
 
   buildImage = (board, packages, target, version) => {
-    return axios.post('https://chef.libremesh.org/api/build-request', {
+    return axios.post(base_api + 'build-request', {
+      profile: board,
       board,
       defaults: '',
       distro: 'openwrt',
@@ -27,19 +25,7 @@ class DataService {
     });
   };
 
-  buildStatusCheck = async (request_hash) => {
-    let response = {
-      isBuilt: false,
-    };
-    await axios.get('https://chef.libremesh.org/api/build-request/' + request_hash).then((res) => {
-      response.isBuilt = res.status === 202 && res.data.files !== undefined;
-      response.status = res.status;
-      if (response.isBuilt) {
-        response = {...response, data: res.data};
-      }
-    });
-    return response;
-  };
+  buildStatusCheck = (request_hash) => axios.get(base_api + 'build-request/' + request_hash);
 
   getFiles = (files_url) => axios.get('https://chef.libremesh.org' + files_url).then(res => res.data);
 

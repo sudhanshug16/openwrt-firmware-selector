@@ -37,6 +37,7 @@ import SearchTextField from '../../components/device-search';
 import PropTypes from 'prop-types';
 
 const buildStatusCheckInterval = 5000;
+const confirmationPopupOnBuildResquest = false;
 
 function TabContainer({children, dir}) {
   return (
@@ -51,44 +52,19 @@ TabContainer.propTypes = {
   dir: PropTypes.any,
 };
 
-class Home extends React.Component {
+const sleep = m => new Promise(r => setTimeout(r, m));
+const asu = 'https://aparcar.stephen304.com';
+const asu_download = 'https://aparcar.stephen304.com/download/json-demo/openwrt/';
 
-  packages = [
-    'opkg',
-    'ip6tables',
-    'odhcp6c',
-    'base-files',
-    'mtd',
-    'fstools',
-    'kmod-leds-gpio',
-    'busybox',
-    'wpad-mini',
-    'kmod-gpio-button-hotplug',
-    'kmod-mt76',
-    'logd',
-    'swconfig',
-    'dnsmasq',
-    'dropbear',
-    'ppp',
-    'netifd',
-    'ppp-mod-pppoe',
-    'uci',
-    'libc',
-    'uclient-fetch',
-    'kmod-ipt-offload',
-    'libgcc',
-    'odhcpd-ipv6only',
-    'iptables',
-    'firewall',
-    'luci'];
-  deviceNames = [];
-  deviceNamesID = {};
-  checkBuildStatus;
+class Home extends React.Component {
   state = {
+    selection: {
+      version: null,
+      device: null,
+    },
     showDeviceData: false,
-    device: {},
     deviceLoaded: false,
-    devices: [],
+    data: [],
     devicesLoaded: false,
     searchResults: [],
     showSearch: false,
@@ -96,45 +72,44 @@ class Home extends React.Component {
     query: '',
     downloading: false,
     packages: this.packages,
-    distributions: {
-      versions: {},
-    },
     configChanged: true,
     packageName: '',
-    release: '',
     builtImages: [],
     isBuilding: false,
+    queuePosition: -1,
     showUnexpectedErrorBar: false,
+    errorMessage: '',
+    fuzzySet: null,
+    showAdvanced: true,
+    basicInterface: 0,
   };
-
-  fuzzySet;
   basicInterface = 0;
   confirmingBuild = false;
 
   dataService = new DataService();
 
-  componentDidMount() {
-    this.dataService.getDistributions.then(distros => {
+  async componentDidMount() {
+    try {
+      const versionsResponse = await this.dataService.getVersions();
+      let data = versionsResponse.data.versions;
+      for (var i = 0; i < data.length; i++) {
+        const overviewResponse = await this.dataService.getOverview(data[i].path);
+        data[i].devices = overviewResponse.data.devices;
+      }
+      this.generateFuzzySet(data[0].devices);
       this.setState({
-        distributions: distros['openwrt'],
-        release: distros['openwrt']['latest'],
+        data,
+        selection: {
+          version: 0,
+        },
+        devicesLoaded: true,
       });
-      this.dataService.getDevicesData.then(data => {
-        Object.keys(data['devices']).forEach((device_name) => {
-          // const device_name = data['devices'][device_id];
-          // this.deviceNames.push(device_name);
-          // this.deviceNamesID[device_name] = device_id;
-          const device_id = data['devices'][device_name];
-          this.deviceNames.push(device_name);
-          this.deviceNamesID[device_name] = device_id;
-        });
-        this.fuzzySet = FuzzySet(this.deviceNames);
-        this.setState({
-          devices: data['devices'],
-          devicesLoaded: true,
-        });
+    } catch (err) {
+      this.setState({
+        showUnexpectedErrorBar: true,
       });
-    });
+      console.log(err);
+    }
   }
 
   closeUnexpectedErrorBar = () => {
@@ -143,28 +118,80 @@ class Home extends React.Component {
     });
   };
 
-  setRelease = (event) => {
+  generateFuzzySet = (data) => {
+    let deviceNames = [];
+    Object.keys(data).forEach((deviceName) => {
+      deviceNames.push(deviceName);
+    });
     this.setState({
-      release: event.target.value,
+      fuzzySet: FuzzySet(deviceNames),
     });
   };
 
-  selectDevice = (device_name) => {
-    if (device_name != null) {
-      const device_id = this.deviceNamesID[device_name];
+  setRelease = (event) => {
+    this.generateFuzzySet(this.state.data[event.target.value].devices);
+    this.setState({
+      selection: {
+        version: event.target.value,
+      },
+      deviceLoaded: false,
+      showDeviceData: false,
+      query: '',
+    });
+  };
+
+  selectDevice = async (device_name) => {
+    const version = this.state.data[this.state.selection.version];
+    let selection;
+    try {
+      let deviceSubPath = version.devices[device_name];
+      if (deviceSubPath.indexOf('//') > 0) {
+        deviceSubPath = deviceSubPath.replace('//', '/generic/');
+      }
+      const devicePath = version.path + '/targets/' + deviceSubPath;
       this.setState({
         showDeviceData: true,
         showSearch: false,
         query: device_name,
+        basicInterface: 0,
         deviceLoaded: false,
+        showAdvanced: false,
+        configChanged: true,
       });
-      this.dataService.getDeviceData(device_id).then(data => {
-        this.setState({
-          device: data,
-          deviceLoaded: true,
-        });
+      let deviceResponse = await this.dataService.getDeviceData(devicePath);
+      selection = this.state.selection;
+      selection.device = deviceResponse.data;
+      if (selection.device.target[selection.device.target.length - 1] === '/') {
+        selection.device.target += 'generic';
+      }
+    } catch (err) {
+      this.setState({
+        showUnexpectedErrorBar: true,
+      });
+      console.log(err);
+      return;
+    }
+    const noPackageFoundError = {error: 'no-packages-found'};
+    try {
+      let devicePackagesResponse = await this.dataService.getDevicePackages(version.name, selection.device.target, selection.device.id);
+      if (devicePackagesResponse.data.length === 0) {
+        throw noPackageFoundError;
+      }
+      var packages = devicePackagesResponse.data;
+      packages.sort();
+      this.setState({
+        packages,
+        showAdvanced: true,
+      });
+    } catch (err) {
+      this.setState({
+        showAdvanced: false,
       });
     }
+    this.setState({
+      selection,
+      deviceLoaded: true,
+    });
   };
 
   search = (event) => {
@@ -174,7 +201,7 @@ class Home extends React.Component {
       searchResults: [],
       showSearch: false,
     });
-    const deviceNames = this.fuzzySet.get(query, undefined, 0);
+    const deviceNames = this.state.fuzzySet.get(query, undefined, 0);
     let searchResults = [];
     if (deviceNames != null) {
       for (let i = 0; i < deviceNames.length && i < 6; i++) {
@@ -194,7 +221,9 @@ class Home extends React.Component {
   };
 
   changeInterface = (e, val) => {
-    this.basicInterface = val;
+    this.setState({
+      basicInterface: val,
+    });
   };
 
   downloadingImageIndicatorShow = () => {
@@ -251,89 +280,91 @@ class Home extends React.Component {
 
   displayBuiltImageData = async (buildStatusResponse) => {
     let builtImages = [];
-    builtImages.push({
-      url: 'https://chef.libremesh.org' +
-          buildStatusResponse.data.files + buildStatusResponse.data.sysupgrade,
-      type: 'sysupgrade',
-    });
-    await this.dataService.getFiles(buildStatusResponse.data.files)
-      .then((fileListResponse) => {
-        fileListResponse.forEach((file) => {
-          if (file.name.includes('factory')) {
-            const type = file.name.split('-').reverse()[0].split('.')[0];
-            builtImages.push({
-              url: 'https://chef.libremesh.org' +
-                    buildStatusResponse.data.files + file.name,
-              type,
-            });
-          }
-        });
-        this.setState({
-          builtImages,
-          configChanged: false,
-          isBuilding: false,
-        });
+    buildStatusResponse.data.images.forEach((image) => {
+      builtImages.push({
+        url: asu +
+            buildStatusResponse.data.image_folder + '/' + image.name,
+        type: image.type,
       });
-    clearTimeout(this.checkBuildStatus);
-  };
-
-  buildImageCheck = async (request_hash) => {
-    const buildStatusResponse = await this.dataService.buildStatusCheck(
-      request_hash);
-    if (buildStatusResponse.status === 202) {
-      this.checkBuildStatus = setTimeout(
-        async () => {
-          await this.buildImageCheck(request_hash);
-        }, buildStatusCheckInterval,
-      );
-    } else if (buildStatusResponse.status === 200) {
-      await this.displayBuiltImageData(buildStatusResponse);
-    } else {
+    });
+    if (this.state.isBuilding) {
       this.setState({
+        builtImages,
+        configChanged: false,
         isBuilding: false,
-        showUnexpectedErrorBar: true,
       });
     }
   };
 
-  buildImage = async () => {
-    this.closeConfirmBuildDialog();
-    const board = this.state.device.id;
-    const packages = this.state.packages;
-    const target = this.state.device['target'] + '/' + this.state.device['subtarget'];
-    const version = this.state.release;
-    this.setState({
-      isBuilding: true,
-      builtImages: [],
-    });
-    this.dataService.buildImage(board, packages, target, version).then(async res => {
-      if (res.status === 202 && res.data['request_hash'] !== undefined) {
-        const request_hash = res.data['request_hash'];
-        this.checkBuildStatus = setTimeout(
-          async () => {
-            await this.buildImageCheck(request_hash);
-          }, buildStatusCheckInterval,
-        );
-      } else if (res.status === 200) {
-        await this.displayBuiltImageData(res);
-      } else {
-        this.setState({
-          isBuilding: false,
-          showUnexpectedErrorBar: true,
-        });
+  buildImageCheck = async (request_hash) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (!this.state.isBuilding) {
+          return;
+        }
+        const buildStatusResponse = await this.dataService.buildStatusCheck(request_hash);
+        if (buildStatusResponse.status === 202) {
+          if (buildStatusResponse.headers['X-Build-Queue-Position'] !== undefined) {
+            this.setState({
+              queuePosition: buildStatusResponse.headers['X-Build-Queue-Position'],
+            });
+          }
+          await sleep(buildStatusCheckInterval);
+          await this.buildImageCheck(request_hash);
+          resolve();
+        } else if (buildStatusResponse.status === 200) {
+          await this.displayBuiltImageData(buildStatusResponse);
+          resolve();
+        } else {
+          throw buildStatusResponse.data;
+        }
+      } catch (err) {
+        reject(err);
       }
-    }).catch(() => {
+    });
+  };
+
+  buildImage = async () => {
+    try {
+      this.closeConfirmBuildDialog();
+      const board = this.state.selection.device.id;
+      const packages = this.state.packages;
+      const target = this.state.selection.device['target'];
+      const version = this.state.data[this.state.selection.version].name.toLowerCase();
+      this.setState({
+        isBuilding: true,
+        builtImages: [],
+      });
+      let buildResponse = await this.dataService.buildImage(board, packages, target, version);
+      if (buildResponse.status === 202 && buildResponse.data['request_hash'] !== undefined) {
+        const request_hash = buildResponse.data['request_hash'];
+        await sleep(buildStatusCheckInterval);
+        await this.buildImageCheck(request_hash);
+      } else if (buildResponse.status === 200) {
+        await this.displayBuiltImageData(buildResponse);
+      } else {
+        throw buildResponse.data;
+      }
+    } catch (err) {
       this.setState({
         isBuilding: false,
         showUnexpectedErrorBar: true,
       });
-    });
+      console.log(err);
+    }
   };
 
+  cancelBuild = () => {
+    this.setState({
+      isBuilding: false,
+      configChanged: true,
+    });
+  }
+
   render() {
-    const warning432 = this.state.showDeviceData &&
+    const warning432 = this.state.showDeviceData && this.state.deviceLoaded &&
         parseInt(
-          (this.state.device['image_size'] || '').slice(0, -1)) <= 4000 && (
+          (this.state.selection.device['image_size'] || '').slice(0, -1)) <= 4000 && (
       <Paper className="warning-432" elevation={0}>
         <Grid
           container
@@ -345,8 +376,7 @@ class Home extends React.Component {
             <WarningIcon className="icon"/>
           </Grid>
           <Grid item xs>
-            {this.props.t(
-              'Devices with ≤4MB flash and/or ≤32MB ram will work but they will be very limited (usually they can\'t install or run additional packages) because they have low RAM and flash space. Consider this when choosing a device to buy, or when deciding to flash OpenWrt on your device because it is listed as supported.')}
+            {this.props.t('warning432')}
           </Grid>
         </Grid>
       </Paper>
@@ -371,19 +401,19 @@ class Home extends React.Component {
                   {this.props.t('Version')}
                 </InputLabel>
                 <Select
-                  value={this.state.release}
+                  value={this.state.selection.version}
                   onChange={this.setRelease}
-                  input={<OutlinedInput name="version"
-                    id="version-select" labelWidth={60}/>}
+                  disabled={this.state.isBuilding}
+                  input={
+                    <OutlinedInput name="version"id="version-select" labelWidth={60}/>
+                  }
                 >
                   {
-                    Object.keys(this.state.distributions['versions'])
-                      .map((version) => (
-                        <MenuItem value={version} key={version}>
-                          <em>{version}</em>
-                        </MenuItem>
-                      ),
-                      )
+                    this.state.data.map((version, i) => (
+                      <MenuItem value={i} key={version.name}>
+                        <em>{version.name}</em>
+                      </MenuItem>
+                    ))
                   }
                 </Select>
               </FormControl>
@@ -394,6 +424,7 @@ class Home extends React.Component {
                   value={this.state.query}
                   onChange={this.search}
                   onClick={this.search}
+                  disabled={this.state.isBuilding}
                 />
                 {
                   this.state.showSearch && this.state.searchResults.length !==
@@ -448,56 +479,59 @@ class Home extends React.Component {
                 <>
                   {warning432}
                   <br/>
-                  <Grid container className="device-info">
-                    <Grid item xs>
-                      <b>{this.props.t(
-                        'Name')}: </b> {this.state.device['title']}({this.state.device['target']}/{this.state.device['subtarget']})
-                    </Grid>
-                    <Grid item xs>
-                      <b>{this.props.t(
-                        'Release Version')}: </b> {this.state.release_version_number}
-                    </Grid>
-                  </Grid>
-                  <AppBar className="interface-switch-bar" position="relative"
-                    elevation={0}>
-                    <Tabs value={this.basicInterface}
-                      onChange={this.changeInterface}>
-                      <Tab className="interface-switch"
-                        label={this.props.t('Basic')}/>
-                      <Tab className="interface-switch"
-                        label={this.props.t('Advanced')}/>
-                    </Tabs>
-                  </AppBar>
                   {
-                    this.basicInterface === 0 ? (
+                    this.state.showAdvanced && (
+                      <AppBar className="interface-switch-bar" position="relative" elevation={0}>
+                        <Tabs value={this.state.basicInterface}onChange={this.changeInterface}>
+                          <Tab className="interface-switch" label={this.props.t('Basic')} disabled={this.state.isBuilding}/>
+                          <Tab className="interface-switch" label={this.props.t('Advanced')} disabled={this.state.isBuilding}/>
+                        </Tabs>
+                      </AppBar>
+                    )
+                  }
+                  {
+                    this.state.basicInterface === 0 ? (
                       <TabContainer>
-                        {
-                          this.state.device.images.map((image, i) => {
-                            return (
-                              <Button
-                                key={i}
-                                className="download-button"
-                                href={'http://downloads.openwrt.org/snapshots/targets/' +
-                                      this.state.device.target + '/' +
-                                      this.state.device.subtarget + '/' +
-                                      image.name}
-                                color="primary"
-                                variant="contained"
-                                onClick={() => this.downloadingImageIndicatorShow()}
-                              >
-                                <CloudDownloadIcon
-                                  className="download-icon"/>
-                                {image.name.split('-').reverse()[0].split('.')[0]}
-                              </Button>
-                            );
-                          })
-                        }
-                          &nbsp;
-                        {
-                          this.state.downloading && (
-                            <CircularProgress size={20}/>
-                          )
-                        }
+                        <Grid container className="device-info">
+                          <Grid item xs>
+                            {this.props.t('Model')}: <b> {this.state.selection.device['title']} </b> <br />
+                            {this.props.t('Target')}: {this.state.selection.device['target']} <br />
+                            {this.props.t('Version')}: {this.state.data[this.state.selection.version].name} ({this.state.data[this.state.selection.version].revision})
+                          </Grid>
+                          <Grid item xs>
+                            <b>{this.props.t('Downloads')}: </b>
+                            {
+                              this.state.selection.device.images.map((image) => {
+                                return (
+                                  <>
+                                    <br />
+                                    <Button
+                                      key={image.name}
+                                      className="download-button"
+                                      href={asu_download +
+                                            this.state.data[this.state.selection.version].path + '/targets/' +
+                                            this.state.selection.device.target + '/' +
+                                            image.name}
+                                      color="primary"
+                                      variant="contained"
+                                      onClick={() => this.downloadingImageIndicatorShow()}
+                                    >
+                                      <CloudDownloadIcon
+                                        className="download-icon"/>
+                                      {image.name.split('-').reverse()[0].split('.')[0]}
+                                    </Button>
+                                  </>
+                                );
+                              })
+                            }
+                              &nbsp;
+                            {
+                              this.state.downloading && (
+                                <CircularProgress size={20}/>
+                              )
+                            }
+                          </Grid>
+                        </Grid>
                       </TabContainer>
                     ) : (
                       <TabContainer>
@@ -507,7 +541,7 @@ class Home extends React.Component {
                               this.state.packages.map((package_name, i) => {
                                 return (
                                   <Chip className="package"
-                                    key={package_name + i}
+                                    key={package_name}
                                     size="small"
                                     onDelete={() => this.deletePackage(
                                       i)}
@@ -531,7 +565,7 @@ class Home extends React.Component {
                           {
                             this.state.configChanged && !this.state.isBuilding && (
                               <Button variant="outlined" color="primary"
-                                onClick={this.openConfirmBuildDialog}>
+                                onClick={confirmationPopupOnBuildResquest ? this.openConfirmBuildDialog : this.buildImage}>
                                 <BuildIcon/>
                                     &nbsp;
                                 {this.props.t('Build')}
@@ -540,35 +574,62 @@ class Home extends React.Component {
                           }
                           {
                             this.state.isBuilding && (
-                              <CircularProgress size={20}/>
+                              <>
+                                <CircularProgress size={20} style={{verticalAlign: 'middle'}}/>
+                                &nbsp;
+                                Building image
+                                {
+                                  this.state.queuePosition !== -1 && (
+                                    <span> (Position in queue: {this.state.queuePosition}) </span>
+                                  )
+                                }
+                                ...
+                                &nbsp;
+                                <Button variant="outlined" size="small"
+                                  onClick={this.cancelBuild}>
+                                      &nbsp;
+                                  {this.props.t('Cancel')}
+                                </Button>
+                              </>
                             )
                           }
                           {
                             this.state.builtImages.length > 0 && !this.state.configChanged && (
-                                  <>
-                                    {
+                              <Grid container className="device-info">
+                                <Grid item xs>
+                                  {this.props.t('Model')}: <b> {this.state.selection.device['title']} </b> <br />
+                                  {this.props.t('Target')}: {this.state.selection.device['target']} <br />
+                                  {this.props.t('Version')}: {this.state.data[this.state.selection.version].name} ({this.state.data[this.state.selection.version].revision})
+                                </Grid>
+                                <Grid item xs>
+                                  <b>{this.props.t('Downloads')}: </b>
+                                  {
                                       this.state.builtImages.map((image) => (
-                                        <Button
-                                          key={image.url}
-                                          className="download-button"
-                                          href={image.url}
-                                          color="primary"
-                                          variant="contained"
-                                          onClick={() => this.downloadingImageIndicatorShow()}
-                                        >
-                                          <CloudDownloadIcon
-                                            className="download-icon"/>
-                                          {image.type}
-                                        </Button>
+                                        <>
+                                          <br />
+                                          <Button
+                                            key={image.url}
+                                            className="download-button"
+                                            href={image.url}
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={() => this.downloadingImageIndicatorShow()}
+                                          >
+                                            <CloudDownloadIcon
+                                              className="download-icon"/>
+                                            {image.type}
+                                          </Button>
+                                        </>
                                       ))
                                     }
                                     &nbsp;
-                                    {
-                                      this.state.downloading && (
-                                        <CircularProgress size={20}/>
-                                      )
-                                    }
-                                  </>
+                                  {
+                                    this.state.downloading && (
+                                      <CircularProgress size={20}/>
+                                    )
+                                  }
+                                </Grid>
+                              </Grid>
                             )
                           }
                         </Paper>

@@ -575,8 +575,13 @@ class Home extends React.Component {
                           {
                             this.state.isBuilding && (
                               <>
-                                <CircularProgress size={20} style={{verticalAlign: 'middle'}}/>
+                                <Button variant="outlined" size="small"
+                                  onClick={this.cancelBuild}>
+                                      &nbsp;
+                                  {this.props.t('Cancel')}
+                                </Button>
                                 &nbsp;
+                                <CircularProgress size={20} style={{verticalAlign: 'middle'}}/>
                                 Building image
                                 {
                                   this.state.queuePosition !== -1 && (
@@ -584,12 +589,7 @@ class Home extends React.Component {
                                   )
                                 }
                                 ...
-                                &nbsp;
-                                <Button variant="outlined" size="small"
-                                  onClick={this.cancelBuild}>
-                                      &nbsp;
-                                  {this.props.t('Cancel')}
-                                </Button>
+                                
                               </>
                             )
                           }

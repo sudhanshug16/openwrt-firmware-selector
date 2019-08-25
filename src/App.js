@@ -8,6 +8,7 @@ import Header from './components/header.js';
 import Home from './containers/home/home';
 import NotFound from './containers/not-found/not-found';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import { Paper } from '@material-ui/core';
 
 const theme = createMuiTheme({
   palette: {
@@ -34,6 +35,14 @@ function App() {
               <Route default component={NotFound}/>
             </Switch>
           </Router>
+          <Paper elevation={4} className="report-problem-container">
+            <span>
+              If you come across any issue, feel free to report <a href="https://github.com/aparcar/attendedsysupgrade-server/issues">here</a>.
+            </span>
+            <span className="report-link">
+              For contributions, go to <a href="https://github.com/sudhanshu16/openwrt-firmware-selector/">Github</a>
+            </span>
+          </Paper>
         </div>
       </Suspense>
     </ThemeProvider>

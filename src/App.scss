@@ -27,6 +27,23 @@
   color: #61dafb;
 }
 
+.report-problem-container {
+  display: block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  padding: 15px 10%;
+  box-sizing: border-box;
+  text-align: left;
+  border-radius: 0
+}
+
+.report-link {
+  float: right;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

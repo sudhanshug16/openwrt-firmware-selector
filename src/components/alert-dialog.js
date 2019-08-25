@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function AlertDialog({open, cancelHandler, acceptHandler, text, title, cancelComponent, acceptComponent}) {
+function AlertDialog({open, cancelHandler, acceptHandler, body, title, cancelComponent, acceptComponent}) {
   return (
     <Dialog
       open={open}
@@ -21,17 +21,24 @@ function AlertDialog({open, cancelHandler, acceptHandler, text, title, cancelCom
         id="alert-dialog-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
-          {text}
+          {body}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={acceptHandler} color="primary">
-          {acceptComponent}
-        </Button>
-        <Button onClick={cancelHandler} color="secondary"
-          variant="contained" autoFocus>
-          {cancelComponent}
-        </Button>
+        {
+          acceptHandler && (
+            <Button onClick={acceptHandler} color="primary">
+              {acceptComponent}
+            </Button>
+          )
+        }
+        {
+          cancelHandler && (
+            <Button onClick={cancelHandler} color="secondary" variant="contained" autoFocus>
+              {cancelComponent}
+            </Button>
+          )
+        }
       </DialogActions>
     </Dialog>
   );
@@ -41,7 +48,7 @@ AlertDialog.propTypes = {
   open: PropTypes.bool,
   cancelHandler: PropTypes.func,
   acceptHandler: PropTypes.func,
-  text: PropTypes.string,
+  body: PropTypes.object,
   title: PropTypes.string,
   cancelComponent: PropTypes.elementType,
   acceptComponent: PropTypes.object,

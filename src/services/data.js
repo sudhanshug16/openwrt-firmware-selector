@@ -13,17 +13,15 @@ class DataService {
 
   getDevicePackages = (version, target, profile) => axios.get(base_api + 'packages_image?distro=openwrt&version=' + version.toLowerCase() + '&target=' + target + '&profile=' + profile.toLowerCase());
 
-  buildImage = (board, packages, target, version) => {
-    return axios.post(base_api + 'build-request', {
-      profile: board,
-      board,
-      defaults: '',
-      distro: 'openwrt',
-      packages,
-      target,
-      version,
-    });
-  };
+  buildImage = (board, packages, target, version) => axios.post(base_api + 'build-request', {
+    profile: board,
+    board,
+    defaults: '',
+    distro: 'openwrt',
+    packages,
+    target,
+    version,
+  });
 
   buildStatusCheck = (request_hash) => axios.get(base_api + 'build-request/' + request_hash);
 

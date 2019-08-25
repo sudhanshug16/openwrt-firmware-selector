@@ -82,8 +82,9 @@ class Home extends React.Component {
     fuzzySet: null,
     showAdvanced: true,
     basicInterface: 0,
+    errorDialogMessage: <></>,
+    openErrorDialog: false,
   };
-  basicInterface = 0;
   confirmingBuild = false;
 
   dataService = new DataService();
@@ -258,7 +259,7 @@ class Home extends React.Component {
       const packageArray = this.state.packageName.split(/[,\n]+/);
       packageArray.forEach((package_name) => {
         package_name = package_name.replace(' ', '');
-        if (package_name !== '') {
+        if (package_name !== '' && packages.indexOf(package_name) === -1) {
           packages.push(package_name);
         }
       });
@@ -315,11 +316,22 @@ class Home extends React.Component {
         } else if (buildStatusResponse.status === 200) {
           await this.displayBuiltImageData(buildStatusResponse);
           resolve();
+        } else if (buildStatusResponse.status === 409) {
+          this.setState({
+            openErrorDialog: true,
+            errorDialogMessage: (
+              <>
+                {buildStatusResponse.data.error} <br />
+                <a href={buildStatusResponse.data.error}>Build logs</a>
+              </>
+            ),
+          });
+          resolve();
         } else {
           throw buildStatusResponse.data;
         }
-      } catch (err) {
-        reject(err);
+      } catch (e) {
+        reject(e);
       }
     });
   };
@@ -336,6 +348,7 @@ class Home extends React.Component {
         builtImages: [],
       });
       let buildResponse = await this.dataService.buildImage(board, packages, target, version);
+      console.log(buildResponse);
       if (buildResponse.status === 202 && buildResponse.data['request_hash'] !== undefined) {
         const request_hash = buildResponse.data['request_hash'];
         await sleep(buildStatusCheckInterval);
@@ -345,12 +358,34 @@ class Home extends React.Component {
       } else {
         throw buildResponse.data;
       }
-    } catch (err) {
-      this.setState({
-        isBuilding: false,
-        showUnexpectedErrorBar: true,
-      });
-      console.log(err);
+    } catch (e) {
+      if (e.response.status === 409) {
+        this.setState({
+          isBuilding: false,
+          openErrorDialog: true,
+          errorDialogMessage: (
+            <>
+              {e.response.data.error} <br />
+              <a href={asu + e.response.data.log} target="_blank" rel="noopener noreferrer">Build logs</a>
+            </>
+          ),
+        });
+      } else if (e.response.status === 422) {
+        this.setState({
+          isBuilding: false,
+          openErrorDialog: true,
+          errorDialogMessage: (
+            <>
+              {e.response.data.error}
+            </>
+          ),
+        });
+      } else {
+        this.setState({
+          isBuilding: false,
+          showUnexpectedErrorBar: true,
+        });
+      }
     }
   };
 
@@ -358,6 +393,12 @@ class Home extends React.Component {
     this.setState({
       isBuilding: false,
       configChanged: true,
+    });
+  }
+  
+  closeErrorDialog = () => {
+    this.setState({
+      openErrorDialog: false,
     });
   }
 
@@ -410,7 +451,7 @@ class Home extends React.Component {
                 >
                   {
                     this.state.data.map((version, i) => (
-                      <MenuItem value={i} key={version.name}>
+                      <MenuItem value={i} key={version.revision}>
                         <em>{version.name}</em>
                       </MenuItem>
                     ))
@@ -501,28 +542,24 @@ class Home extends React.Component {
                           <Grid item xs>
                             <b>{this.props.t('Downloads')}: </b>
                             {
-                              this.state.selection.device.images.map((image) => {
-                                return (
-                                  <>
-                                    <br />
-                                    <Button
-                                      key={image.name}
-                                      className="download-button"
-                                      href={asu_download +
-                                            this.state.data[this.state.selection.version].path + '/targets/' +
-                                            this.state.selection.device.target + '/' +
-                                            image.name}
-                                      color="primary"
-                                      variant="contained"
-                                      onClick={() => this.downloadingImageIndicatorShow()}
-                                    >
-                                      <CloudDownloadIcon
-                                        className="download-icon"/>
-                                      {image.name.split('-').reverse()[0].split('.')[0]}
-                                    </Button>
-                                  </>
-                                );
-                              })
+                              this.state.selection.device.images.map((image) =>
+                                <div key={image.name}>
+                                  <Button
+                                    className="download-button"
+                                    href={asu_download +
+                                          this.state.data[this.state.selection.version].path + '/targets/' +
+                                          this.state.selection.device.target + '/' +
+                                          image.name}
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={() => this.downloadingImageIndicatorShow()}
+                                  >
+                                    <CloudDownloadIcon
+                                      className="download-icon"/>
+                                    {image.name.split('-').reverse()[0].split('.')[0]}
+                                  </Button>
+                                </div>
+                              )
                             }
                               &nbsp;
                             {
@@ -538,17 +575,15 @@ class Home extends React.Component {
                         <Paper elevation={0} className="package-list-input">
                           <div>
                             {
-                              this.state.packages.map((package_name, i) => {
-                                return (
+                              this.state.packages.map((package_name, i) => 
                                   <Chip className="package"
-                                    key={package_name}
+                                    key={package_name + i}
                                     size="small"
                                     onDelete={() => this.deletePackage(
                                       i)}
                                     label={package_name}
                                   />
-                                );
-                              })
+                              )
                             }
                             <Tooltip
                               title={<span>Use comma or new line separated array.  <br/>Press enter to apply.</span>}>
@@ -581,8 +616,11 @@ class Home extends React.Component {
                                   {this.props.t('Cancel')}
                                 </Button>
                                 &nbsp;
+                                &nbsp;
                                 <CircularProgress size={20} style={{verticalAlign: 'middle'}}/>
+                                &nbsp;
                                 Building image
+                                &nbsp;
                                 {
                                   this.state.queuePosition !== -1 && (
                                     <span> (Position in queue: {this.state.queuePosition}) </span>
@@ -651,16 +689,26 @@ class Home extends React.Component {
             cancelHandler={this.closeConfirmBuildDialog}
             acceptHandler={this.buildImage}
             open={this.confirmingBuild}
-            text={this.props.t(
-              'Building image requires computation resources, so we would request you to check if this selection is what you want')}
+            body={
+              <>
+                {this.props.t('Building image requires computation resources, so we would request you to check if this selection is what you want')}
+              </>
+            }
             title={this.props.t(
               'Please confirm that you want to perform this action')}
             cancelComponent={this.props.t('Cancel')}
             acceptComponent={
-                <>
-                  {this.props.t('Build')} &nbsp; <BuildIcon/>
-                </>
+              <>
+                {this.props.t('Build')} &nbsp; <BuildIcon/>
+              </>
             }
+          />
+          <AlertDialog
+            cancelHandler={this.closeErrorDialog}
+            open={this.state.openErrorDialog}
+            body={this.state.errorDialogMessage}
+            title={this.props.t('There is an error with the packages you selected')}
+            cancelComponent={this.props.t('Dismiss')}
           />
           <Container className="home-container">
             <Paper className="home-container-paper">

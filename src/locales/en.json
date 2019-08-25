@@ -22,6 +22,8 @@
     "OpenWrt Firmware Selector Wizard": "OpenWrt Firmware Selector Wizard",
     "Download OpenWrt firmware for your device!": "Download OpenWrt firmware for your device!",
     "Target": "Target",
+    "Dismiss": "Dismiss",
+    "There is an error with the packages you selected": "There is an error with the packages you selected",
     "Downloads": "Downloads",
     "Please use the input below to download firmware for your device!": "Please use the input below to download firmware for your device!"
 }

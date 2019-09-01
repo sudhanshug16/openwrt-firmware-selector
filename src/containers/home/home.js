@@ -21,10 +21,14 @@ import {
   Tabs,
   Tooltip,
   Typography,
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  ExpansionPanelDetails
 } from '@material-ui/core';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import WarningIcon from '@material-ui/icons/Warning';
 import BuildIcon from '@material-ui/icons/Build';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import './home.scss';
 import {withTranslation} from 'react-i18next';
 import FuzzySet from 'fuzzyset.js';
@@ -74,6 +78,7 @@ class Home extends React.Component {
     packages: this.packages,
     configChanged: true,
     packageName: '',
+    builtDeviceManifest: [],
     builtImages: [],
     isBuilding: false,
     queuePosition: -1,
@@ -280,6 +285,12 @@ class Home extends React.Component {
   };
 
   displayBuiltImageData = async (buildStatusResponse) => {
+    const manifestResponse = await this.dataService.getDeviceManifest(
+      buildStatusResponse.data.image_folder + '/' + buildStatusResponse.data.image_prefix + '.manifest'
+    );
+
+    const builtDeviceManifest = manifestResponse.data.split('\n');
+
     let builtImages = [];
     buildStatusResponse.data.images.forEach((image) => {
       builtImages.push({
@@ -290,6 +301,7 @@ class Home extends React.Component {
     });
     if (this.state.isBuilding) {
       this.setState({
+        builtDeviceManifest,
         builtImages,
         configChanged: false,
         isBuilding: false,
@@ -298,42 +310,63 @@ class Home extends React.Component {
   };
 
   buildImageCheck = async (request_hash) => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (!this.state.isBuilding) {
-          return;
-        }
-        const buildStatusResponse = await this.dataService.buildStatusCheck(request_hash);
-        if (buildStatusResponse.status === 202) {
-          if (buildStatusResponse.headers['X-Build-Queue-Position'] !== undefined) {
-            this.setState({
-              queuePosition: buildStatusResponse.headers['X-Build-Queue-Position'],
-            });
-          }
-          await sleep(buildStatusCheckInterval);
-          await this.buildImageCheck(request_hash);
-          resolve();
-        } else if (buildStatusResponse.status === 200) {
-          await this.displayBuiltImageData(buildStatusResponse);
-          resolve();
-        } else if (buildStatusResponse.status === 409) {
-          this.setState({
-            openErrorDialog: true,
-            errorDialogMessage: (
-              <>
-                {buildStatusResponse.data.error} <br />
-                <a href={buildStatusResponse.data.error}>Build logs</a>
-              </>
-            ),
-          });
-          resolve();
-        } else {
-          throw buildStatusResponse.data;
-        }
-      } catch (e) {
-        reject(e);
+    try {
+      if (!this.state.isBuilding) {
+        return;
       }
-    });
+      const buildStatusResponse = await this.dataService.buildStatusCheck(request_hash);
+      if (buildStatusResponse.status === 202) {
+        if (buildStatusResponse.headers['X-Build-Queue-Position'] !== undefined) {
+          this.setState({
+            queuePosition: buildStatusResponse.headers['X-Build-Queue-Position'],
+          });
+        }
+        await sleep(buildStatusCheckInterval);
+        await this.buildImageCheck(request_hash);
+      } else if (buildStatusResponse.status === 200) {
+        await this.displayBuiltImageData(buildStatusResponse);
+      } else if (buildStatusResponse.status === 409) {
+        this.setState({
+          openErrorDialog: true,
+          errorDialogMessage: (
+            <>
+              {buildStatusResponse.data.error} <br />
+              <a href={buildStatusResponse.data.error}>Build logs</a>
+            </>
+          ),
+        });
+      } else {
+        throw buildStatusResponse.data;
+      }
+    } catch (e) {
+      if (e.response.status === 409) {
+        this.setState({
+          isBuilding: false,
+          openErrorDialog: true,
+          errorDialogMessage: (
+            <>
+              {e.response.data.error} <br />
+              <a href={asu + e.response.data.log} target="_blank" rel="noopener noreferrer">Build logs</a>
+            </>
+          ),
+        });
+      } else if (e.response.status === 422) {
+        this.setState({
+          isBuilding: false,
+          openErrorDialog: true,
+          errorDialogMessage: (
+            <>
+              {e.response.data.error}
+            </>
+          ),
+        });
+      } else {
+        this.setState({
+          isBuilding: false,
+          showUnexpectedErrorBar: true,
+        });
+      }
+    }
   };
 
   buildImage = async () => {
@@ -348,7 +381,6 @@ class Home extends React.Component {
         builtImages: [],
       });
       let buildResponse = await this.dataService.buildImage(board, packages, target, version);
-      console.log(buildResponse);
       if (buildResponse.status === 202 && buildResponse.data['request_hash'] !== undefined) {
         const request_hash = buildResponse.data['request_hash'];
         await sleep(buildStatusCheckInterval);
@@ -576,13 +608,13 @@ class Home extends React.Component {
                           <div>
                             {
                               this.state.packages.map((package_name, i) => 
-                                  <Chip className="package"
-                                    key={package_name + i}
-                                    size="small"
-                                    onDelete={() => this.deletePackage(
-                                      i)}
-                                    label={package_name}
-                                  />
+                                <Chip className="package"
+                                  key={package_name + i}
+                                  size="small"
+                                  onDelete={() => this.deletePackage(
+                                    i)}
+                                  label={package_name}
+                                />
                               )
                             }
                             <Tooltip
@@ -638,29 +670,46 @@ class Home extends React.Component {
                                   {this.props.t('Model')}: <b> {this.state.selection.device['title']} </b> <br />
                                   {this.props.t('Target')}: {this.state.selection.device['target']} <br />
                                   {this.props.t('Version')}: {this.state.data[this.state.selection.version].name} ({this.state.data[this.state.selection.version].revision})
+                                  <ExpansionPanel className="installed-packages" elevation={0}>
+                                    <ExpansionPanelSummary
+                                      expandIcon={<ExpandMoreIcon />}
+                                      id="packages-manifest"
+                                    >
+                                      <Typography className="installed-packages-title">Installed Packages ({this.state.builtDeviceManifest.length})</Typography>
+                                    </ExpansionPanelSummary>
+                                    <ExpansionPanelDetails>
+                                      <div>
+                                        {
+                                          this.state.builtDeviceManifest.map(
+                                            (package_name) => <div key={package_name}>
+                                              {package_name}
+                                            </div>
+                                          )
+                                        }
+                                      </div>
+                                    </ExpansionPanelDetails>
+                                  </ExpansionPanel>
                                 </Grid>
                                 <Grid item xs>
                                   <b>{this.props.t('Downloads')}: </b>
                                   {
-                                      this.state.builtImages.map((image) => (
-                                        <>
-                                          <br />
-                                          <Button
-                                            key={image.url}
-                                            className="download-button"
-                                            href={image.url}
-                                            color="primary"
-                                            variant="contained"
-                                            onClick={() => this.downloadingImageIndicatorShow()}
-                                          >
-                                            <CloudDownloadIcon
-                                              className="download-icon"/>
-                                            {image.type}
-                                          </Button>
-                                        </>
-                                      ))
-                                    }
-                                    &nbsp;
+                                    this.state.builtImages.map((image) => 
+                                      <div key={image.url}>
+                                        <Button
+                                          className="download-button"
+                                          href={image.url}
+                                          color="primary"
+                                          variant="contained"
+                                          onClick={() => this.downloadingImageIndicatorShow()}
+                                        >
+                                          <CloudDownloadIcon
+                                            className="download-icon"/>
+                                          {image.type}
+                                        </Button>
+                                      </div>
+                                    )
+                                  }
+                                  &nbsp;
                                   {
                                     this.state.downloading && (
                                       <CircularProgress size={20}/>

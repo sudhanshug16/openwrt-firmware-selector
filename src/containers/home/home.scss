@@ -23,6 +23,19 @@ $bg-color: #f0f0f0;
 
     .device-info {
       margin-bottom: 15px;
+
+      .installed-packages {
+        width: 80%;
+        border: 1px solid #e3e3e3;
+        border-radius: 7px;
+        margin-top: 16px !important;
+      }
+      .installed-packages::before {
+        display: none;
+      }
+      .installed-packages-title {
+        font-weight: bold;
+      }
     }
 
     .version-select {
@@ -75,6 +88,7 @@ $bg-color: #f0f0f0;
       font-weight: bold;
       margin-bottom: 15px;
     }
+
 
     .download-button {
       margin-top: 17px;

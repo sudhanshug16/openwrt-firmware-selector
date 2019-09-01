@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const base =
+  'https://cors-anywhere.herokuapp.com/https://aparcar.stephen304.com';
 const base_downloads =
   'https://cors-anywhere.herokuapp.com/https://aparcar.stephen304.com/download/json-demo/openwrt/';
 const base_api =
@@ -11,6 +13,8 @@ class DataService {
   getOverview = path => axios.get(base_downloads + path + '/overview.json');
 
   getDeviceData = device_path => axios.get(base_downloads + device_path);
+
+  getDeviceManifest = manifest_path => axios.get(base + manifest_path);
 
   getDevicePackages = (version, target, profile) =>
     axios.get(

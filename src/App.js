@@ -1,9 +1,9 @@
-import React, {Suspense} from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import React, { Suspense } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './App.scss';
 
-import {createMuiTheme} from '@material-ui/core/styles';
-import {ThemeProvider} from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
 import Header from './components/header.js';
 import Home from './containers/home/home';
 import NotFound from './containers/not-found/not-found';
@@ -24,23 +24,28 @@ const theme = createMuiTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Suspense fallback={
-        <LinearProgress/>
-      }>
+      <Suspense fallback={<LinearProgress />}>
         <div className="App">
-          <Header/>
+          <Header />
           <Router>
             <Switch>
-              <Route path="" component={Home}/>
-              <Route default component={NotFound}/>
+              <Route path="" component={Home} />
+              <Route default component={NotFound} />
             </Switch>
           </Router>
           <Paper elevation={4} className="report-problem-container">
             <span>
-              If you come across any issue, feel free to report <a href="https://github.com/aparcar/attendedsysupgrade-server/issues">here</a>.
+              If you come across any issue, feel free to report{' '}
+              <a href="https://github.com/aparcar/attendedsysupgrade-server/issues">
+                here
+              </a>
+              .
             </span>
             <span className="report-link">
-              For contributions, go to <a href="https://github.com/sudhanshu16/openwrt-firmware-selector/">Github</a>
+              For contributions, go to{' '}
+              <a href="https://github.com/sudhanshu16/openwrt-firmware-selector/">
+                Github
+              </a>
             </span>
           </Paper>
         </div>

@@ -14,12 +14,11 @@ import {
   Toolbar,
   Typography,
 } from '@material-ui/core';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 
 export default function Header() {
-
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [value, setValue] = React.useState('en');
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -41,13 +40,19 @@ export default function Header() {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography edge="start" variant="h6">{t(
-          'OpenWrt Firmware Selector Wizard')}</Typography>
-        <div style={{flexGrow: 1}} />
-        <Button aria-describedby={id} color="secondary" variant="contained"
-          onClick={openChangeLanguagePopper} href="#">
+        <Typography edge="start" variant="h6">
+          {t('OpenWrt Firmware Selector Wizard')}
+        </Typography>
+        <div style={{ flexGrow: 1 }} />
+        <Button
+          aria-describedby={id}
+          color="secondary"
+          variant="contained"
+          onClick={openChangeLanguagePopper}
+          href="#"
+        >
           {t('Change Language')} &nbsp;
-          <LanguageIcon/>
+          <LanguageIcon />
         </Button>
         <Popper
           id={id}
@@ -56,22 +61,28 @@ export default function Header() {
           transition
           disablePortal={true}
         >
-          {({TransitionProps}) => (
+          {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
               <Paper className="language-selector-popper">
                 <FormControl component="fieldset">
                   <FormLabel component="legend">Change Language</FormLabel>
-                  <br/>
+                  <br />
                   <RadioGroup
                     aria-label="Language"
                     name="language"
                     value={value}
                     onChange={changeLanguage}
                   >
-                    <FormControlLabel value="en" control={<Radio/>}
-                      label={t('English')}/>
-                    <FormControlLabel value="de" control={<Radio/>}
-                      label={t('German')}/>
+                    <FormControlLabel
+                      value="en"
+                      control={<Radio />}
+                      label={t('English')}
+                    />
+                    <FormControlLabel
+                      value="de"
+                      control={<Radio />}
+                      label={t('German')}
+                    />
                   </RadioGroup>
                 </FormControl>
               </Paper>

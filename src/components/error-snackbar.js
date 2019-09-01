@@ -23,7 +23,7 @@ const SnackBarStyles = makeStyles(theme => ({
   },
 }));
 
-function ErrorSnackBar({open, closeHandle, errorMessage}) {
+function ErrorSnackBar({ open, closeHandle, errorMessage }) {
   const classes = SnackBarStyles();
   return (
     <Snackbar
@@ -43,15 +43,18 @@ function ErrorSnackBar({open, closeHandle, errorMessage}) {
         aria-describedby="client-snackbar"
         message={
           <span id="client-snackbar" className={classes.message}>
-            <ErrorIcon className={classes.icon}/>
-            {errorMessage ||
-                'An unexpected error occurred. Please try again'}
+            <ErrorIcon className={classes.icon} />
+            {errorMessage || 'An unexpected error occurred. Please try again'}
           </span>
         }
         action={[
-          <IconButton key="close" aria-label="Close" color="inherit"
-            onClick={closeHandle}>
-            <CloseIcon/>
+          <IconButton
+            key="close"
+            aria-label="Close"
+            color="inherit"
+            onClick={closeHandle}
+          >
+            <CloseIcon />
           </IconButton>,
         ]}
       />

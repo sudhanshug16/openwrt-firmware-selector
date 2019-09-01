@@ -1,5 +1,5 @@
-import {InputAdornment, makeStyles, TextField} from '@material-ui/core';
-import {fade} from '@material-ui/core/styles';
+import { InputAdornment, makeStyles, TextField } from '@material-ui/core';
+import { fade } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -29,22 +29,18 @@ function SearchTextField(props) {
   return (
     <TextField
       variant="outlined"
-      label={
-        <div className="search-label">
-          {props.labeltext}
-        </div>
-      }
+      label={<div className="search-label">{props.labeltext}</div>}
       disabled={props.disabled}
-      InputProps={
-        {
-          classes,
-          endAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon className={classes.label}/>
-            </InputAdornment>
-          ),
-        }
-      } {...props} />
+      InputProps={{
+        classes,
+        endAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon className={classes.label} />
+          </InputAdornment>
+        ),
+      }}
+      {...props}
+    />
   );
 }
 

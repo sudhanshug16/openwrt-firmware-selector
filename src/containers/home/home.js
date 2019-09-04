@@ -57,8 +57,9 @@ TabContainer.propTypes = {
 };
 
 const sleep = m => new Promise(r => setTimeout(r, m));
+const CORSbyPass = 'https://cors-anywhere.herokuapp.com/';
 const asu = 'https://aparcar.stephen304.com';
-const asu_download =
+const asu_vanilla =
   'https://aparcar.stephen304.com/download/json-demo/openwrt/';
 
 class Home extends React.Component {
@@ -97,11 +98,13 @@ class Home extends React.Component {
 
   async componentDidMount() {
     try {
-      const versionsResponse = await this.dataService.getVersions();
+      const versionsResponse = await this.dataService.getVersions(
+        CORSbyPass + asu_vanilla + 'versions.json'
+      );
       let data = versionsResponse.data.versions;
       for (var i = 0; i < data.length; i++) {
         const overviewResponse = await this.dataService.getOverview(
-          data[i].path
+          CORSbyPass + asu_vanilla + data[i].path + '/overview.json'
         );
         data[i].devices = overviewResponse.data.devices;
       }
@@ -158,6 +161,7 @@ class Home extends React.Component {
         deviceSubPath = deviceSubPath.replace('//', '/generic/');
       }
       const devicePath = version.path + '/targets/' + deviceSubPath;
+
       this.setState({
         showDeviceData: true,
         showSearch: false,
@@ -167,12 +171,28 @@ class Home extends React.Component {
         showAdvanced: false,
         configChanged: true,
       });
-      let deviceResponse = await this.dataService.getDeviceData(devicePath);
+
+      const deviceResponse = await this.dataService.getDeviceData(
+        CORSbyPass + asu_vanilla + devicePath
+      );
       selection = this.state.selection;
       selection.device = deviceResponse.data;
       if (selection.device.target[selection.device.target.length - 1] === '/') {
         selection.device.target += 'generic';
       }
+
+      selection.device.deviceManifest = await this.dataService.getDeviceManifest(
+        CORSbyPass +
+          asu_vanilla +
+          version.path +
+          '/targets/' +
+          selection.device.target +
+          '/openwrt-' +
+          selection.device.target.split('/')[0] +
+          '-' +
+          selection.device.target.split('/')[1] +
+          '-default.manifest'
+      );
     } catch (err) {
       this.setState({
         showUnexpectedErrorBar: true,
@@ -292,14 +312,14 @@ class Home extends React.Component {
   };
 
   displayBuiltImageData = async buildStatusResponse => {
-    const manifestResponse = await this.dataService.getDeviceManifest(
-      buildStatusResponse.data.image_folder +
+    const builtDeviceManifest = await this.dataService.getDeviceManifest(
+      CORSbyPass +
+        asu +
+        buildStatusResponse.data.image_folder +
         '/' +
         buildStatusResponse.data.image_prefix +
         '.manifest'
     );
-
-    const builtDeviceManifest = manifestResponse.data.split('\n');
 
     let builtImages = [];
     buildStatusResponse.data.images.forEach(image => {
@@ -596,6 +616,29 @@ class Home extends React.Component {
                     {this.props.t('Version')}:{' '}
                     {this.state.data[this.state.selection.version].name} (
                     {this.state.data[this.state.selection.version].revision})
+                    <ExpansionPanel
+                      className="installed-packages"
+                      elevation={0}
+                    >
+                      <ExpansionPanelSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        id="packages-manifest"
+                      >
+                        <Typography className="installed-packages-title">
+                          Installed Packages (
+                          {this.state.selection.device.deviceManifest.length})
+                        </Typography>
+                      </ExpansionPanelSummary>
+                      <ExpansionPanelDetails>
+                        <div>
+                          {this.state.selection.device.deviceManifest.map(
+                            package_name => (
+                              <div key={package_name}>{package_name}</div>
+                            )
+                          )}
+                        </div>
+                      </ExpansionPanelDetails>
+                    </ExpansionPanel>
                   </Grid>
                   <Grid item xs>
                     <b>{this.props.t('Downloads')}: </b>
@@ -604,7 +647,7 @@ class Home extends React.Component {
                         <Button
                           className="download-button"
                           href={
-                            asu_download +
+                            asu_vanilla +
                             this.state.data[this.state.selection.version].path +
                             '/targets/' +
                             this.state.selection.device.target +

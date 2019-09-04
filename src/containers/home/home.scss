@@ -4,9 +4,18 @@ $bg-color: #f0f0f0;
   margin-top: 30px;
   margin-bottom: 100px;
 
+  @media all and (max-width: 820px) {
+    margin-top: 15px;
+    margin-bottom: 100px;
+  }
+
   .home-container-paper {
     padding: 30px;
     text-align: left;
+
+    @media all and (max-width: 820px) {
+      padding: 15px;
+    }
 
     .warning-432 {
       background-color: $bg-color;
@@ -17,7 +26,7 @@ $bg-color: #f0f0f0;
 
       .icon {
         margin: 0 20px 0 10px;
-        color: #F9A825
+        color: #f9a825;
       }
     }
 
@@ -29,7 +38,17 @@ $bg-color: #f0f0f0;
         border: 1px solid #e3e3e3;
         border-radius: 7px;
         margin-top: 16px !important;
+
+        @media all and (max-width: 820px) {
+          width: 100%;
+        }
       }
+      .installed-packages .packages {
+        overflow: auto;
+        word-wrap: none;
+        white-space: nowrap;
+      }
+
       .installed-packages::before {
         display: none;
       }
@@ -89,12 +108,17 @@ $bg-color: #f0f0f0;
       margin-bottom: 15px;
     }
 
+    .downloads {
+      @media all and (max-width: 820px) {
+        margin-top: 20px;
+      }
 
-    .download-button {
-      margin-top: 17px;
-      
-      .download-icon {
-        margin-right: 10px;
+      .download-button {
+        margin-top: 17px;
+
+        .download-icon {
+          margin-right: 10px;
+        }
       }
     }
 
@@ -141,8 +165,9 @@ $bg-color: #f0f0f0;
         background-color: $bg-color;
       }
 
-      .package:focus, .package:active {
-        transition: .2s;
+      .package:focus,
+      .package:active {
+        transition: 0.2s;
         background-color: darken($bg-color, 15%);
       }
     }

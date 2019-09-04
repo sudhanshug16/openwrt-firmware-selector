@@ -629,7 +629,7 @@ class Home extends React.Component {
                           {this.state.selection.device.deviceManifest.length})
                         </Typography>
                       </ExpansionPanelSummary>
-                      <ExpansionPanelDetails>
+                      <ExpansionPanelDetails className="packages">
                         <div>
                           {this.state.selection.device.deviceManifest.map(
                             package_name => (
@@ -640,7 +640,7 @@ class Home extends React.Component {
                       </ExpansionPanelDetails>
                     </ExpansionPanel>
                   </Grid>
-                  <Grid item xs>
+                  <Grid item xs className="downloads">
                     <b>{this.props.t('Downloads')}: </b>
                     {this.state.selection.device.images.map(image => (
                       <div key={image.name}>

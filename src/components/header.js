@@ -16,6 +16,7 @@ import {
 } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
+import '../App.scss';
 
 export default function Header() {
   const { t, i18n } = useTranslation();
@@ -38,11 +39,12 @@ export default function Header() {
   const id = open ? 'simple-popper' : undefined;
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" className="header">
       <Toolbar>
-        <Typography edge="start" variant="h6">
-          {t('OpenWrt Firmware Selector Wizard')}
+        <Typography edge="start" variant="h6" className="title-desktop">
+          {t('OpenWrt Firmware Selector')}
         </Typography>
+        <span className="title-mobile">{t('OpenWrt Firmware Selector')}</span>
         <div style={{ flexGrow: 1 }} />
         <Button
           aria-describedby={id}
@@ -51,7 +53,9 @@ export default function Header() {
           onClick={openChangeLanguagePopper}
           href="#"
         >
-          {t('Change Language')} &nbsp;
+          <span className="language-toggle-text">
+            {t('Change Language')} &nbsp;
+          </span>
           <LanguageIcon />
         </Button>
         <Popper

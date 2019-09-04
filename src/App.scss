@@ -45,11 +45,43 @@
   float: right;
 }
 
+.header {
+  .title-desktop {
+    @media all and (max-width: 820px) {
+      display: none;
+    }
+  }
+
+  .title-mobile {
+    @media all and (min-width: 820px) {
+      display: none;
+    }
+  }
+
+  .language-toggle-text {
+    @media all and (max-width: 820px) {
+      display: none;
+    }
+  }
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media all and (max-width: 800px) {
+  .report-problem-container {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .report-link {
+    float: none;
+    display: block;
   }
 }

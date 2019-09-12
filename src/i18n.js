@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import translationEN from './locales/en.json';
 import translationDE from './locales/de.json';
+import Config from './config';
 
 const resources = {
   en: {
@@ -19,7 +20,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    debug: true,
+    debug: Config.settings.i18nDebug,
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     },

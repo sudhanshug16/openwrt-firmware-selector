@@ -15,6 +15,7 @@
   "Build": "Bauen",
   "Cancel": "Abbrechen",
   "Add package(s)": "Paket (e) hinzufügen",
+  "Edit UCI defaults": "Bearbeiten Sie die UCI-Standardeinstellungen",
   "Version": "Ausführung",
   "Please confirm that you want to perform this action": "Bitte bestätigen Sie, dass Sie diese Aktion ausführen möchten",
   "Building image requires computation resources, so we would request you to check if this selection is what you want": "Das Erstellen eines Image erfordert Rechenressourcen. Wir bitten Sie daher, zu prüfen, ob diese Auswahl Ihren Wünschen entspricht",

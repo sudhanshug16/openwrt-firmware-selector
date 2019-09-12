@@ -26,11 +26,11 @@ class DataService {
         profile.toLowerCase()
     );
 
-  buildImage = (board, packages, target, version) =>
+  buildImage = (board, packages, target, version, uciDefaults) =>
     axios.post(base_api + 'build-request', {
       profile: board,
       board,
-      defaults: '',
+      defaults: uciDefaults,
       distro: 'openwrt',
       packages,
       target,

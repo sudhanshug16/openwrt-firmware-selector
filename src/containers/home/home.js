@@ -19,6 +19,7 @@ import {
   Select,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography,
   ExpansionPanel,
@@ -91,6 +92,7 @@ class Home extends React.Component {
     basicInterface: 0,
     errorDialogMessage: <></>,
     openErrorDialog: false,
+    uciDefaults: '',
   };
   confirmingBuild = false;
 
@@ -303,6 +305,12 @@ class Home extends React.Component {
     }
   };
 
+  uciDefaultsEdit = event => {
+    this.setState({
+      uciDefaults: event.target.value,
+    });
+  };
+
   closeConfirmBuildDialog = () => {
     this.confirmingBuild = false;
   };
@@ -408,12 +416,15 @@ class Home extends React.Component {
   buildImage = async () => {
     try {
       this.closeConfirmBuildDialog();
-      const board = this.state.selection.device.id;
-      const packages = this.state.packages;
-      const target = this.state.selection.device['target'];
-      const version = this.state.data[
-        this.state.selection.version
-      ].name.toLowerCase();
+      const { packages, selection, data, uciDefaults } = this.state;
+      const {
+        device: { id: board, target },
+        version: versionId,
+      } = selection;
+      let {
+        [versionId]: { name: version },
+      } = data;
+      version = version.toLowerCase();
       this.setState({
         isBuilding: true,
         builtImages: [],
@@ -422,7 +433,8 @@ class Home extends React.Component {
         board,
         packages,
         target,
-        version
+        version,
+        uciDefaults
       );
       if (
         buildResponse.status === 202 &&
@@ -437,6 +449,7 @@ class Home extends React.Component {
         throw buildResponse.data;
       }
     } catch (e) {
+      console.log(e);
       if (e.response.status === 409) {
         this.setState({
           isBuilding: false,
@@ -483,11 +496,15 @@ class Home extends React.Component {
   };
 
   render() {
-    const warning432 = this.state.showDeviceData &&
+    let warning432 = <> </>;
+    if (
+      this.state.showDeviceData &&
       this.state.deviceLoaded &&
       parseInt(
         (this.state.selection.device['image_size'] || '').slice(0, -1)
-      ) <= 4000 && (
+      ) <= 4000
+    ) {
+      warning432 = (
         <Paper className="warning-432" elevation={0}>
           <Grid container direction="row" justify="center" alignItems="center">
             <Grid item>
@@ -499,6 +516,63 @@ class Home extends React.Component {
           </Grid>
         </Paper>
       );
+    }
+
+    let deviceInfoGrid = <></>;
+
+    if (this.state.builtImages.length > 0 && !this.state.configChanged) {
+      deviceInfoGrid = (
+        <Grid container className="device-info">
+          <Grid item xs>
+            {this.props.t('Model')}:{' '}
+            <b> {this.state.selection.device['title']} </b> <br />
+            {this.props.t('Target')}: {this.state.selection.device['target']}{' '}
+            <br />
+            {this.props.t('Version')}: {'('}
+            {this.state.data[this.state.selection.version].name}
+            {this.state.data[this.state.selection.version].revision}
+            {')'}
+            <ExpansionPanel className="installed-packages" elevation={0}>
+              <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                id="packages-manifest"
+              >
+                <Typography className="installed-packages-title">
+                  Installed Packages ({this.state.builtDeviceManifest.length})
+                </Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <div>
+                  {this.state.builtDeviceManifest.map(package_name => (
+                    <div key={package_name}>{package_name}</div>
+                  ))}
+                </div>
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+          </Grid>
+          <Grid item xs>
+            <b>{this.props.t('Downloads')}: </b>
+            {this.state.builtImages.map(image => (
+              <div key={image.url}>
+                <Button
+                  className="download-button"
+                  href={image.url}
+                  color="primary"
+                  variant="contained"
+                  onClick={() => this.downloadingImageIndicatorShow()}
+                >
+                  <CloudDownloadIcon className="download-icon" />
+                  {image.type}
+                </Button>
+              </div>
+            ))}
+            &nbsp;
+            {this.state.downloading && <CircularProgress size={20} />}
+          </Grid>
+        </Grid>
+      );
+    }
+
     const notLoaded = <CircularProgress />;
     const onLoad = (
       <>
@@ -676,33 +750,48 @@ class Home extends React.Component {
             ) : (
               <TabContainer>
                 <Paper elevation={0} className="package-list-input">
-                  <div>
-                    {this.state.packages.map((package_name, i) => (
-                      <Chip
-                        className="package"
-                        key={package_name + i}
-                        size="small"
-                        onDelete={() => this.deletePackage(i)}
-                        label={package_name}
-                      />
-                    ))}
-                    <Tooltip
-                      title={
-                        <span>
-                          Use comma or new line separated array. <br />
-                          Press enter to apply.
-                        </span>
-                      }
-                    >
-                      <Input
+                  <Grid container>
+                    <Grid item xs={12} md={8}>
+                      <h3>Packages</h3>
+                      {this.state.packages.map((package_name, i) => (
+                        <Chip
+                          className="package"
+                          key={package_name + i}
+                          size="small"
+                          onDelete={() => this.deletePackage(i)}
+                          label={package_name}
+                        />
+                      ))}
+                      <Tooltip
+                        title={
+                          <span>
+                            Use comma or new line separated array. <br />
+                            Press enter to apply.
+                          </span>
+                        }
+                      >
+                        <Input
+                          multiline
+                          value={this.state.packageName}
+                          onKeyUp={this.addPackage}
+                          onChange={this.changeAddPackageInput}
+                          placeholder={this.props.t('Add package(s)')}
+                        />
+                      </Tooltip>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <h3>UCI defaults (alpha)</h3>
+                      <TextField
+                        style={{ width: '100%' }}
                         multiline
-                        value={this.state.packageName}
-                        onKeyUp={this.addPackage}
-                        onChange={this.changeAddPackageInput}
-                        placeholder={this.props.t('Add package(s)')}
+                        variant="outlined"
+                        rows={10}
+                        value={this.state.uciDefaults}
+                        onChange={this.uciDefaultsEdit}
+                        placeholder={this.props.t('Edit UCI defaults')}
                       />
-                    </Tooltip>
-                  </div>
+                    </Grid>
+                  </Grid>
                   <br />
                   {this.state.configChanged && !this.state.isBuilding && (
                     <Button
@@ -744,70 +833,7 @@ class Home extends React.Component {
                       ...
                     </>
                   )}
-                  {this.state.builtImages.length > 0 &&
-                    !this.state.configChanged && (
-                      <Grid container className="device-info">
-                        <Grid item xs>
-                          {this.props.t('Model')}:{' '}
-                          <b> {this.state.selection.device['title']} </b> <br />
-                          {this.props.t('Target')}:{' '}
-                          {this.state.selection.device['target']} <br />
-                          {this.props.t('Version')}:{' '}
-                          {this.state.data[this.state.selection.version].name} (
-                          {
-                            this.state.data[this.state.selection.version]
-                              .revision
-                          }
-                          )
-                          <ExpansionPanel
-                            className="installed-packages"
-                            elevation={0}
-                          >
-                            <ExpansionPanelSummary
-                              expandIcon={<ExpandMoreIcon />}
-                              id="packages-manifest"
-                            >
-                              <Typography className="installed-packages-title">
-                                Installed Packages (
-                                {this.state.builtDeviceManifest.length})
-                              </Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
-                              <div>
-                                {this.state.builtDeviceManifest.map(
-                                  package_name => (
-                                    <div key={package_name}>{package_name}</div>
-                                  )
-                                )}
-                              </div>
-                            </ExpansionPanelDetails>
-                          </ExpansionPanel>
-                        </Grid>
-                        <Grid item xs>
-                          <b>{this.props.t('Downloads')}: </b>
-                          {this.state.builtImages.map(image => (
-                            <div key={image.url}>
-                              <Button
-                                className="download-button"
-                                href={image.url}
-                                color="primary"
-                                variant="contained"
-                                onClick={() =>
-                                  this.downloadingImageIndicatorShow()
-                                }
-                              >
-                                <CloudDownloadIcon className="download-icon" />
-                                {image.type}
-                              </Button>
-                            </div>
-                          ))}
-                          &nbsp;
-                          {this.state.downloading && (
-                            <CircularProgress size={20} />
-                          )}
-                        </Grid>
-                      </Grid>
-                    )}
+                  {deviceInfoGrid}
                 </Paper>
               </TabContainer>
             )}
@@ -815,6 +841,7 @@ class Home extends React.Component {
         )}
       </>
     );
+
     return (
       <>
         <ErrorSnackBar

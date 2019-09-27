@@ -24,7 +24,7 @@
   "Download OpenWrt firmware for your device!": "¡Descargue el firmware OpenWrt para su dispositivo!",
   "Target": "Objetivo",
   "Dismiss": "Descartar",
-  "There is an error with the packages you selected": "Hay un error con los paquetes que seleccionó",
+  "There is an error with the packages you selected": "Hay un error con los paquetes seleccionados",
   "Downloads": "Descargas",
   "Please use the input below to download firmware for your device!": "¡Utilice la entrada a continuación para descargar el firmware de su dispositivo!"
 }

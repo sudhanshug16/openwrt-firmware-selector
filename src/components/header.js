@@ -87,6 +87,16 @@ export default function Header() {
                       control={<Radio />}
                       label={t('German')}
                     />
+                    <FormControlLabel
+                      value="ru"
+                      control={<Radio />}
+                      label={t('Russian')}
+                    />
+                    <FormControlLabel
+                      value="pt_br"
+                      control={<Radio />}
+                      label={t('Brazilian Portuguese')}
+                    />
                   </RadioGroup>
                 </FormControl>
               </Paper>

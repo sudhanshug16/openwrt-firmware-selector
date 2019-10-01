@@ -3,6 +3,9 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import translationEN from './locales/en.json';
 import translationDE from './locales/de.json';
+import translationES from './locales/es.json';
+import translationRU from './locales/ru.json';
+import translationPTBR from './locales/pt_br.json';
 import Config from './config';
 
 const resources = {
@@ -11,6 +14,15 @@ const resources = {
   },
   de: {
     translation: translationDE,
+  },
+  es: {
+    translation: translationES
+  },
+  ru: {
+    translation: translationRU,
+  },
+  pt_br: {
+    translation: translationPTBR,
   },
 };
 

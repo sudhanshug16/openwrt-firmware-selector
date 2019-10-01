@@ -6,6 +6,7 @@ import translationDE from './locales/de.json';
 import translationES from './locales/es.json';
 import translationRU from './locales/ru.json';
 import translationPTBR from './locales/pt_br.json';
+import translationTR from './locales/tr.json';
 import Config from './config';
 
 const resources = {
@@ -24,6 +25,9 @@ const resources = {
   pt_br: {
     translation: translationPTBR,
   },
+  tr:{
+    translation: translationTR,
+  }
 };
 
 i18n

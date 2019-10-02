@@ -17,7 +17,7 @@ const resources = {
     translation: translationDE,
   },
   es: {
-    translation: translationES
+    translation: translationES,
   },
   ru: {
     translation: translationRU,
@@ -25,9 +25,9 @@ const resources = {
   pt_br: {
     translation: translationPTBR,
   },
-  tr:{
+  tr: {
     translation: translationTR,
-  }
+  },
 };
 
 i18n

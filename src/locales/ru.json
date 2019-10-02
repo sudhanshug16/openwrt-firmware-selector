@@ -1,7 +1,10 @@
 {
-  "English": "Английский",
-  "German": "Немецкий",
-  "Russian ": "Русский ",
+  "English": "English",
+  "German": "Deutsch",
+  "Russian": "русский",
+  "Brazilian Portuguese": "português (Brasil)",
+  "Turkish": "Türkçe",
+  "Spanish": "español",
   "Submit": "Подтвердить",
   "Change Language": "Сменить язык",
   "Search your device": "Найдите своё устройство",

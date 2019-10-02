@@ -64,6 +64,7 @@ export default function Header() {
           anchorEl={anchorEl}
           transition
           disablePortal={true}
+          className="language-selector-popper-container"
         >
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>

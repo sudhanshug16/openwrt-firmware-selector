@@ -19,6 +19,10 @@
   color: white;
 }
 
+.language-selector-popper-container {
+  z-index: 10;
+}
+
 .language-selector-popper {
   padding: 15px;
 }

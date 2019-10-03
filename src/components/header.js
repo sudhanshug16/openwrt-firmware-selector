@@ -1,5 +1,5 @@
 import React from 'react';
-import LanguageIcon from '@material-ui/icons/Language';
+import TranslateIcon from '@material-ui/icons/Translate';
 import {
   AppBar,
   Button,
@@ -56,7 +56,7 @@ export default function Header() {
           <span className="language-toggle-text">
             {t('Change Language')} &nbsp;
           </span>
-          <LanguageIcon />
+          <TranslateIcon />
         </Button>
         <Popper
           id={id}

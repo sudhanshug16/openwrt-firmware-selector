@@ -219,6 +219,7 @@ class Home extends React.Component {
         showAdvanced: true,
       });
     } catch (err) {
+      console.log(err);
       this.setState({
         showAdvanced: false,
       });
@@ -308,6 +309,7 @@ class Home extends React.Component {
   uciDefaultsEdit = event => {
     this.setState({
       uciDefaults: event.target.value,
+      configChanged: true,
     });
   };
 

@@ -34,6 +34,7 @@ import './home.scss';
 import { withTranslation } from 'react-i18next';
 import FuzzySet from 'fuzzyset.js';
 
+import config from '../../config';
 import DataService from '../../services/data';
 
 import AlertDialog from '../../components/alert-dialog';
@@ -58,10 +59,7 @@ TabContainer.propTypes = {
 };
 
 const sleep = m => new Promise(r => setTimeout(r, m));
-const CORSbyPass = 'https://cors-anywhere.herokuapp.com/';
-const asu = 'https://aparcar.stephen304.com';
-const asu_vanilla =
-  'https://aparcar.stephen304.com/download/json-demo/openwrt/';
+const { CORSbyPass, asu, asu_vanilla } = config;
 
 class Home extends React.Component {
   state = {
@@ -552,7 +550,7 @@ class Home extends React.Component {
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </Grid>
-          <Grid item xs>
+          <Grid item xs className="downloads">
             <b>{this.props.t('Downloads')}: </b>
             {this.state.builtImages.map(image => (
               <div key={image.url}>

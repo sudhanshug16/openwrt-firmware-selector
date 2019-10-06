@@ -1,7 +1,8 @@
 import axios from 'axios';
+import config from '../config';
 
-const base_api =
-  'https://cors-anywhere.herokuapp.com/https://aparcar.stephen304.com/api/';
+const { CORSbyPass, base_api: api } = config;
+const base_api = CORSbyPass + api;
 
 class DataService {
   getVersions = versionsPath => axios.get(versionsPath);
@@ -39,9 +40,6 @@ class DataService {
 
   buildStatusCheck = request_hash =>
     axios.get(base_api + 'build-request/' + request_hash);
-
-  getFiles = files_url =>
-    axios.get('https://chef.libremesh.org' + files_url).then(res => res.data);
 }
 
 export default DataService;

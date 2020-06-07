@@ -32,3 +32,4 @@ In order to deploy the web app, follow the following steps:
     ``` yarn build ```
     2. Host the files from `/build` directory.
 
+## [LICENSE](LICENSE)

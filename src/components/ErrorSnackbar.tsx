@@ -1,15 +1,9 @@
-import {
-  IconButton,
-  makeStyles,
-  Snackbar,
-  SnackbarContent,
-} from '@material-ui/core';
+import React, { FunctionComponent } from 'react';
+import { IconButton, makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import ErrorIcon from '@material-ui/icons/Error';
 import CloseIcon from '@material-ui/icons/Close';
-import React from 'react';
-import PropTypes from 'prop-types';
 
-const SnackBarStyles = makeStyles(theme => ({
+const SnackBarStyles = makeStyles((theme) => ({
   error: {
     backgroundColor: theme.palette.error.dark,
   },
@@ -23,7 +17,13 @@ const SnackBarStyles = makeStyles(theme => ({
   },
 }));
 
-function ErrorSnackBar({ open, closeHandle, errorMessage }) {
+type Props = {
+  open: boolean;
+  closeHandle: () => void;
+  errorMessage: string;
+};
+
+const ErrorSnackbar: FunctionComponent<Props> = ({ open, closeHandle, errorMessage }) => {
   const classes = SnackBarStyles();
   return (
     <Snackbar
@@ -48,24 +48,13 @@ function ErrorSnackBar({ open, closeHandle, errorMessage }) {
           </span>
         }
         action={[
-          <IconButton
-            key="close"
-            aria-label="Close"
-            color="inherit"
-            onClick={closeHandle}
-          >
+          <IconButton key="close" aria-label="Close" color="inherit" onClick={closeHandle}>
             <CloseIcon />
           </IconButton>,
         ]}
       />
     </Snackbar>
   );
-}
-
-ErrorSnackBar.propTypes = {
-  open: PropTypes.bool,
-  closeHandle: PropTypes.func,
-  errorMessage: PropTypes.string,
 };
 
-export default ErrorSnackBar;
+export default ErrorSnackbar;

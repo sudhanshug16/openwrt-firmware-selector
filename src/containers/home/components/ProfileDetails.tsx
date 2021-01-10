@@ -172,21 +172,28 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
             </TableRow>
           </TableHead>
           <TableBody>
-            {profile.images?.map((i) => (
-              <TableRow>
-                <TableCell>
-                  <Button endIcon={<CloudDownload />} variant="contained" color="primary">
-                    {i.type}
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Box p={1}>
-                    <Typography>{t(`tr-${getHelpKey(i.type)}`)}</Typography>
-                    <Typography variant="caption">sha256sum: {i.sha256}</Typography>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
+            {profile.images?.map((i) => {
+              const downloadURL = `${config.image_url
+                .replace('{target}', profile.target)
+                .replace('{version}', profile.version_number)}/${i.name}`;
+              return (
+                <TableRow>
+                  <TableCell>
+                    <Link href={downloadURL} target="_blank">
+                      <Button endIcon={<CloudDownload />} variant="contained" color="primary">
+                        {i.type}
+                      </Button>
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Box p={1}>
+                      <Typography>{t(`tr-${getHelpKey(i.type)}`)}</Typography>
+                      <Typography variant="caption">sha256sum: {i.sha256}</Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

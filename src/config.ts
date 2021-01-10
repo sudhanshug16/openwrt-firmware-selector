@@ -11,7 +11,7 @@ const config = {
   default_version: '19.07.5',
 
   // Image download URL (optional)
-  image_url: 'https://downloads.openwrt.org/releases/{version}/{target}',
+  image_url: 'https://downloads.openwrt.org/releases/{version}/targets/{target}',
 
   // Info link URL (optional)
   info_url: 'https://openwrt.org/start?do=search&id=toh&q={title}',

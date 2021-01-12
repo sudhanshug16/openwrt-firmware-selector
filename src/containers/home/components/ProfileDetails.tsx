@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import React, { FunctionComponent, ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -34,7 +34,6 @@ const profilesData: { [key: string]: Profile } = {};
 
 const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedProfile }) => {
   const [profile, setProfileData] = useState<Profile>();
-  const [working, toggleWorking] = useState<boolean>(true);
   const { t } = useTranslation();
 
   const getHelpKey = (type: string) => {
@@ -63,8 +62,6 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
   const getProfileData = useCallback(async () => {
     let profileData = profilesData[selectedProfile.id];
 
-    toggleWorking(true);
-
     if (!profileData) {
       const response = await Axios.get<Profile>(
         `${process.env.PUBLIC_URL}/data/${selectedVersion}/${selectedProfile.target}/${selectedProfile.id}.json`
@@ -73,20 +70,23 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
       profilesData[selectedProfile.id] = profileData;
     }
 
-    toggleWorking(false);
-
     return profileData;
   }, [selectedVersion, selectedProfile]);
 
   useEffect(() => {
+    let mounted = true;
     if (selectedVersion && selectedProfile) {
       getProfileData().then((_profileData) => {
-        if (!isEqual(profile, _profileData)) setProfileData(_profileData);
+        if (mounted && !isEqual(profile, _profileData)) setProfileData(_profileData);
       });
     }
+
+    return () => {
+      mounted = false;
+    };
   }, [selectedVersion, selectedProfile, getProfileData, profile]);
 
-  if (working || !profile) return <CircularProgress />;
+  if (!profile) return <CircularProgress />;
 
   const buildAt = new Date(profile.build_at);
 
@@ -103,11 +103,13 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
           <TableBody>
             <TableRow>
               <TableCell>{t('tr-model')}</TableCell>
-              <TableCell>{profile.titles?.map((title) => getTitle(title)).join(', ')}</TableCell>
+              <TableCell id="title">
+                {profile.titles?.map((title) => getTitle(title)).join(', ')}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>{t('tr-target')}</TableCell>
-              <TableCell>{profile.target}</TableCell>
+              <TableCell id="target">{profile.target}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>{t('tr-version')}</TableCell>
@@ -121,39 +123,37 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
             </TableRow>
             <TableRow>
               <TableCell>Info</TableCell>
-              {profile.titles && (
-                <TableCell>
-                  {profile.titles
-                    .map<React.ReactNode>((title) => {
-                      const titleString = getTitle(title);
-                      const infoUrl = config.info_url
-                        .replace('{title}', encodeURI(titleString))
-                        .replace('{target}', profile.target)
-                        .replace('{id}', profile.id)
-                        .replace('{version}', profile.version_number);
-
-                      return (
-                        <Link href={infoUrl}>
-                          {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-                          {profile.titles!.length > 1 && (
-                            <Typography component="span">{titleString}</Typography>
-                          )}
-                          <Launch
-                            style={{
-                              marginLeft: 10,
-                              verticalAlign: 'middle',
-                            }}
-                          />
-                        </Link>
-                      );
-                    })
-                    .reduce((prev, curr) => [
-                      prev,
-                      <Box display="inline-block" marginRight={2} />,
-                      curr,
-                    ])}
-                </TableCell>
-              )}
+              <TableCell>
+                {profile.titles
+                  ?.map<React.ReactNode>((title: TitlesEntity) => {
+                    const titleString = getTitle(title);
+                    const infoUrl = config.info_url.replace('{title}', encodeURI(titleString));
+                    return (
+                      <Link href={infoUrl} key={titleString}>
+                        {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                        {profile.titles!.length > 1 && (
+                          <Typography component="span">{titleString}</Typography>
+                        )}
+                        <Launch
+                          style={{
+                            marginLeft: 10,
+                            verticalAlign: 'middle',
+                          }}
+                        />
+                      </Link>
+                    );
+                  })
+                  .reduce((acc: ReactNode, curr: ReactNode) => [
+                    acc,
+                    // eslint-disable-next-line react/no-array-index-key
+                    <Box
+                      display="inline-block"
+                      marginRight={2}
+                      key={(acc?.toString() ?? '') + (curr?.toString() ?? '')}
+                    />,
+                    curr,
+                  ])}
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -177,9 +177,9 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                 .replace('{target}', profile.target)
                 .replace('{version}', profile.version_number)}/${i.name}`;
               return (
-                <TableRow>
+                <TableRow key={downloadURL}>
                   <TableCell>
-                    <Link href={downloadURL} target="_blank">
+                    <Link href={downloadURL} target="_blank" data-testid="download_link">
                       <Button endIcon={<CloudDownload />} variant="contained" color="primary">
                         {i.type}
                       </Button>

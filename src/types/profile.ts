@@ -1,12 +1,12 @@
 export interface Profile {
-  arch_packages: string;
+  arch_packages?: string;
   build_at: string;
   default_packages?: string[] | null;
   device_packages?: string[] | null;
   id: string;
-  image_prefix: string;
+  image_prefix?: string;
   images?: ImagesEntity[] | null;
-  metadata_version: number;
+  metadata_version?: number;
   target: string;
   titles?: TitlesEntity[] | null;
   version_code: string;

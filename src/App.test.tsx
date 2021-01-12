@@ -1,9 +1,18 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (k: string) => k,
+    i18n: {
+      changeLanguage: (l: string) => {},
+      language: 'en',
+    },
+  }),
+}));
+
+test('renders the app container', () => {
+  const { container } = render(<App />);
+  expect(container.querySelector('div.App')).toBeTruthy();
 });

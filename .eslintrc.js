@@ -32,6 +32,7 @@ module.exports = {
   rules: {
     'linebreak-style': 'off',
     'react/prop-types': 'off',
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'prettier/prettier': [
       'error',
       {

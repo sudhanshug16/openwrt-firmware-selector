@@ -1,25 +1,19 @@
 import React, { FunctionComponent } from 'react';
-import { Container, Paper, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Container, Link, Paper, Typography } from '@material-ui/core';
 
-const page404Styles = makeStyles((theme) => ({
-  root: {
-    padding: theme.spacing(3, 2),
-  },
-}));
-
-const NotFound: FunctionComponent = () => {
-  const classes = page404Styles();
-  return (
-    <Container style={{ marginTop: '50px' }}>
-      <Paper className={classes.root} elevation={3}>
+const NotFound: FunctionComponent = () => (
+  <Container style={{ marginTop: '50px' }}>
+    <Paper elevation={3}>
+      <Box padding={3}>
         <Typography variant="h5" component="h3">
           404 Page Not Found
         </Typography>
-        <Typography component="p">Please head to the home.</Typography>
-      </Paper>
-    </Container>
-  );
-};
+        <Typography component="p">
+          Please head to the <Link href={process.env.PUBLIC_URL}>home</Link>.
+        </Typography>
+      </Box>
+    </Paper>
+  </Container>
+);
 
 export default NotFound;

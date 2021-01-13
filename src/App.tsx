@@ -29,7 +29,7 @@ const App: FunctionComponent = () => {
           <Header />
           <Router>
             <Switch>
-              <Route path="" component={Home} />
+              <Route path="" exact component={Home} />
               <Route default component={NotFound} />
             </Switch>
           </Router>

@@ -7,6 +7,7 @@ import { matchSorter } from 'match-sorter';
 import { useTranslation } from 'react-i18next';
 
 import { Overview, ProfilesEntity } from '../../../types/overview';
+import { getTitle } from '../utils/title';
 
 type Props = {
   selectedVersion: string;
@@ -17,7 +18,7 @@ type SearchData = { value: ProfilesEntity; search: string; title: string };
 
 const overviewData: { [key: string]: Overview } = {};
 
-const SearchField: FunctionComponent<Props> = ({ selectedVersion, onProfileChange }) => {
+const ProfileSearch: FunctionComponent<Props> = ({ selectedVersion, onProfileChange }) => {
   const [searchData, setSearchData] = useState<SearchData[]>([]);
   const [working, toggleWorking] = useState<boolean>(true);
   const { t } = useTranslation();
@@ -38,12 +39,13 @@ const SearchField: FunctionComponent<Props> = ({ selectedVersion, onProfileChang
 
     toggleWorking(false);
 
-    overview.profiles?.forEach((profile) => {
-      profile.titles?.forEach((title) => {
+    overview.profiles.forEach((profile) => {
+      profile.titles.forEach((titleEntity) => {
+        const title = getTitle(titleEntity);
         searchDataArray.push({
           value: profile,
-          search: profile.id + title.title,
-          title: title.title || `${title.vendor} ${title.model}`,
+          search: profile.id + title,
+          title,
         });
       });
     });
@@ -58,8 +60,7 @@ const SearchField: FunctionComponent<Props> = ({ selectedVersion, onProfileChang
   }, [getSearchData, searchData, selectedVersion]);
 
   const handleProfileSelect = (_: unknown, searchDataRow: SearchData | null) => {
-    if (!searchDataRow) return;
-    onProfileChange(searchDataRow.value);
+    if (searchDataRow) onProfileChange(searchDataRow.value);
   };
 
   const getOptionLabel = (option: SearchData) => option.title;
@@ -85,6 +86,7 @@ const SearchField: FunctionComponent<Props> = ({ selectedVersion, onProfileChang
 
   return (
     <Autocomplete
+      data-testid="search-autocomplete"
       options={searchData}
       getOptionLabel={getOptionLabel}
       renderInput={renderInput}
@@ -94,4 +96,4 @@ const SearchField: FunctionComponent<Props> = ({ selectedVersion, onProfileChang
   );
 };
 
-export default SearchField;
+export default ProfileSearch;

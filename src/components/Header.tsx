@@ -37,6 +37,7 @@ const Header: FunctionComponent = () => {
         <div style={{ flexGrow: 1 }} />
         <Box position="relative">
           <Button
+            data-testid="language-menu-toggle"
             aria-controls="language-menu"
             aria-haspopup="true"
             color="secondary"
@@ -51,12 +52,18 @@ const Header: FunctionComponent = () => {
           </Button>
           <Menu
             id="language-menu"
+            data-testid="language-menu"
             open={showLanguageSwitch}
             anchorEl={languageSwitchAnchorEl.current}
             onClose={() => toggleLanguageSwitch(false)}
           >
             {Object.keys(locales).map((l) => (
-              <MenuItem key={l} value={l} onClick={() => handleLanguageChange(l)}>
+              <MenuItem
+                key={l}
+                value={l}
+                onClick={() => handleLanguageChange(l)}
+                data-testid={`locale-${l}`}
+              >
                 <Checkbox size="small" checked={i18n.language === l} /> {t(locales[l])}
               </MenuItem>
             ))}

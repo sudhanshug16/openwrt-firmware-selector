@@ -26,6 +26,7 @@ const VersionSelector: FunctionComponent<Props> = ({ selectedVersion, onVersionC
         labelId="version-select-label"
         value={selectedVersion}
         onChange={handleVersionChange}
+        data-testid="version-select"
       >
         {Object.keys(versions).map((version) => (
           <MenuItem value={version} key={version}>

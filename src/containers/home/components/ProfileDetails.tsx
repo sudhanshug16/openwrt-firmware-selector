@@ -20,14 +20,11 @@ import { useTranslation } from 'react-i18next';
 import { ProfilesEntity } from '../../../types/overview';
 import { Profile, TitlesEntity } from '../../../types/profile';
 import config from '../../../config';
+import { getTitle } from '../utils/title';
 
 type Props = {
   selectedVersion: string;
   selectedProfile: ProfilesEntity;
-};
-
-const getTitle = (title: TitlesEntity) => {
-  return title.title || `${title.vendor} ${title.model}`;
 };
 
 const profilesData: { [key: string]: Profile } = {};
@@ -75,11 +72,9 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
 
   useEffect(() => {
     let mounted = true;
-    if (selectedVersion && selectedProfile) {
-      getProfileData().then((_profileData) => {
-        if (mounted && !isEqual(profile, _profileData)) setProfileData(_profileData);
-      });
-    }
+    getProfileData().then((_profileData) => {
+      if (mounted && !isEqual(profile, _profileData)) setProfileData(_profileData);
+    });
 
     return () => {
       mounted = false;
@@ -143,14 +138,10 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                       </Link>
                     );
                   })
-                  .reduce((acc: ReactNode, curr: ReactNode) => [
+                  .reduce((acc: ReactNode, curr: ReactNode, i: number) => [
                     acc,
                     // eslint-disable-next-line react/no-array-index-key
-                    <Box
-                      display="inline-block"
-                      marginRight={2}
-                      key={(acc?.toString() ?? '') + (curr?.toString() ?? '')}
-                    />,
+                    <Box display="inline-block" marginRight={2} key={i} />,
                     curr,
                   ])}
               </TableCell>
@@ -177,7 +168,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                 .replace('{target}', profile.target)
                 .replace('{version}', profile.version_number)}/${i.name}`;
               return (
-                <TableRow key={downloadURL}>
+                <TableRow key={downloadURL + i.type}>
                   <TableCell>
                     <Link href={downloadURL} target="_blank" data-testid="download_link">
                       <Button endIcon={<CloudDownload />} variant="contained" color="primary">

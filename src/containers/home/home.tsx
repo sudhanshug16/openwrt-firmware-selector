@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState } from 'react';
 import { Container, Paper, Box, Typography, Grid } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
-import SearchField from './components/SearchField';
+import ProfileSearch from './components/ProfileSearch';
 import VersionSelector from './components/VersionSelector';
 import ProfileDetails from './components/ProfileDetails';
 import config from '../../config';
@@ -11,14 +11,6 @@ const Home: FunctionComponent = () => {
   const [selectedVersion, setSelectedVersion] = useState(Object.keys(config.versions)[0]);
   const [selectedProfile, setSelectedProfile] = useState<ProfilesEntity | null>();
   const { t } = useTranslation();
-
-  const onVersionChange = (version: string) => {
-    setSelectedVersion(version);
-  };
-
-  const onProfileChange = (profile: ProfilesEntity) => {
-    setSelectedProfile(profile);
-  };
 
   return (
     <Container>
@@ -37,12 +29,17 @@ const Home: FunctionComponent = () => {
             </Box>
             <Grid container spacing={2}>
               <Grid item xs>
-                <SearchField selectedVersion={selectedVersion} onProfileChange={onProfileChange} />
+                <ProfileSearch
+                  selectedVersion={selectedVersion}
+                  onProfileChange={setSelectedProfile}
+                  data-testid="profile-search"
+                />
               </Grid>
               <Grid item xs={3}>
                 <VersionSelector
+                  data-testid="version-selector"
                   selectedVersion={selectedVersion}
-                  onVersionChange={onVersionChange}
+                  onVersionChange={setSelectedVersion}
                 />
               </Grid>
             </Grid>

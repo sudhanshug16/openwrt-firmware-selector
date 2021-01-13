@@ -38,18 +38,58 @@ const testProfile1: Profile = {
 
 const testProfile2: Profile = {
   build_at: '2020-12-08 13:51:01',
-  target: 'TEST_TARGET',
-  version_code: 'TEST_VERSION_CODE',
-  version_number: 'TEST_VERSION_NUMBER',
-  id: 'TEST_ID',
+  target: 'TEST_TARGET_2',
+  version_code: 'TEST_VERSION_CODE_2',
+  version_number: 'TEST_VERSION_NUMBER_2',
+  id: 'TEST_ID_2',
   titles: [
     {
       title: 'TEST_TITLE2',
     },
   ],
+  images: [
+    {
+      name: 'factorytestimage',
+      type: 'factory',
+      sha256: 'sha256',
+    },
+    {
+      name: 'kerneltestimage',
+      type: 'kernel',
+      sha256: 'sha256',
+    },
+    {
+      name: 'roottestimage',
+      type: 'root',
+      sha256: 'sha256',
+    },
+    {
+      name: 'tftptestimage',
+      type: 'tftp',
+      sha256: 'sha256',
+    },
+    {
+      name: 'sdcardtestimage',
+      type: 'sdcard',
+      sha256: 'sha256',
+    },
+    {
+      name: 'randomtestimage',
+      type: 'random',
+      sha256: 'sha256',
+    },
+  ],
 };
 
-const testProfiles = [testProfile1, testProfile2];
+const testProfile3: Profile = {
+  build_at: '2020-12-08 13:51:01',
+  target: 'TEST_TARGET_3',
+  version_code: 'TEST_VERSION_CODE_3',
+  version_number: 'TEST_VERSION_NUMBER_3',
+  id: 'TEST_ID_3',
+};
+
+const testProfiles = [testProfile1, testProfile2, testProfile3];
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -67,7 +107,7 @@ describe('Profile Details', () => {
     mockAxios.reset();
   });
 
-  it('renders the component, sends a get request and displays and shows the profile target', async () => {
+  it('renders the component and sends a get request', async () => {
     render(
       <ProfileDetails
         selectedProfile={{
@@ -123,11 +163,11 @@ describe('Profile Details', () => {
 
   it('renders download links correctly', async () => {
     for (const p of testProfiles) {
-      render(
+      const { getAllByTestId } = render(
         <ProfileDetails
           selectedProfile={{
-            id: 'TEST_ID1',
-            target: 'TEST_TARGET',
+            id: p.id,
+            target: p.target,
           }}
           selectedVersion={testVersion}
         />
@@ -136,7 +176,7 @@ describe('Profile Details', () => {
       mockAxios.onGet().replyOnce(200, p);
 
       await waitFor(() => {
-        const downloadLinks = screen.getAllByTestId('download_link');
+        const downloadLinks = getAllByTestId('download_link');
         let expectedItems = p.images?.map((i) => i.type) || [];
         downloadLinks.forEach((downloadLink) => {
           expectedItems = expectedItems.filter((i) => i !== downloadLink.textContent);

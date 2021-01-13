@@ -5,10 +5,10 @@ export interface Profile {
   device_packages?: string[] | null;
   id: string;
   image_prefix?: string;
-  images?: ImagesEntity[] | null;
+  images: ImagesEntity[];
   metadata_version?: number;
   target: string;
-  titles?: TitlesEntity[] | null;
+  titles: TitlesEntity[];
   version_code: string;
   version_number: string;
 }

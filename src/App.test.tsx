@@ -6,6 +6,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (k: string) => k,
     i18n: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       changeLanguage: (l: string) => {},
       language: 'en',
     },

@@ -1,4 +1,4 @@
-# OpenWrt Firmware Selector Wizard
+# OpenWrt Firmware Selector Wizard [![codecov](https://codecov.io/gh/sudhanshu16/openwrt-firmware-selector/branch/master/graph/badge.svg?token=F26634D0PG)](https://codecov.io/gh/sudhanshu16/openwrt-firmware-selector)
 
 A simple OpenWrt firmware selector using autocompletion.
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import ProfileDetails from './ProfileDetails';
@@ -87,6 +87,8 @@ const testProfile3: Profile = {
   version_code: 'TEST_VERSION_CODE_3',
   version_number: 'TEST_VERSION_NUMBER_3',
   id: 'TEST_ID_3',
+  images: [],
+  titles: [],
 };
 
 const testProfiles = [testProfile1, testProfile2, testProfile3];
@@ -108,15 +110,7 @@ describe('Profile Details', () => {
   });
 
   it('renders the component and sends a get request', async () => {
-    render(
-      <ProfileDetails
-        selectedProfile={{
-          id: 'TEST_ID1',
-          target: 'TEST_TARGET',
-        }}
-        selectedVersion={testVersion}
-      />
-    );
+    render(<ProfileDetails selectedProfile={testProfile1} selectedVersion={testVersion} />);
 
     mockAxios.onGet().replyOnce(200);
 
@@ -127,13 +121,7 @@ describe('Profile Details', () => {
 
   it('renders titles correctly', async () => {
     let { container } = render(
-      <ProfileDetails
-        selectedProfile={{
-          id: 'TEST_ID1',
-          target: 'TEST_TARGET',
-        }}
-        selectedVersion={testVersion}
-      />
+      <ProfileDetails selectedProfile={testProfile1} selectedVersion={testVersion} />
     );
 
     mockAxios.onGet().replyOnce(200, testProfile1);
@@ -145,13 +133,7 @@ describe('Profile Details', () => {
     });
 
     ({ container } = render(
-      <ProfileDetails
-        selectedProfile={{
-          id: 'TEST_ID2',
-          target: 'TEST_TARGET',
-        }}
-        selectedVersion={testVersion}
-      />
+      <ProfileDetails selectedProfile={testProfile2} selectedVersion={testVersion} />
     ));
 
     mockAxios.onGet().replyOnce(200, testProfile2);
@@ -164,13 +146,7 @@ describe('Profile Details', () => {
   it('renders download links correctly', async () => {
     for (const p of testProfiles) {
       const { getAllByTestId } = render(
-        <ProfileDetails
-          selectedProfile={{
-            id: p.id,
-            target: p.target,
-          }}
-          selectedVersion={testVersion}
-        />
+        <ProfileDetails selectedProfile={p} selectedVersion={testVersion} />
       );
 
       mockAxios.onGet().replyOnce(200, p);

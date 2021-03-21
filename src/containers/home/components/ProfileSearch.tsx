@@ -73,13 +73,11 @@ const ProfileSearch: FunctionComponent<Props> = ({ selectedVersion, onProfileCha
     options: SearchData[],
     state: FilterOptionsState<SearchData>
   ) => SearchData[] = (options, { inputValue }) =>
-    throttle(
-      () =>
-        matchSorter(options, inputValue.replaceAll(' ', ''), {
-          keys: ['search'],
-        }).slice(0, 10),
-      1000
-    )() || [];
+    throttle(() => {
+      return matchSorter(options, inputValue.replaceAll?.(' ', '') || inputValue, {
+        keys: ['search'],
+      }).slice(0, 10);
+    }, 1000)() || [];
 
   if (working) return <CircularProgress />;
 

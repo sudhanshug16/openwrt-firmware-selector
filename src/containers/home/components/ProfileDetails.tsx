@@ -2,8 +2,16 @@ import React, { FunctionComponent, ReactNode, useCallback, useEffect, useState }
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
+  FormControl,
+  Grid,
+  IconButton,
+  Input,
+  InputAdornment,
+  InputLabel,
   Link,
+  makeStyles,
   Table,
   TableBody,
   TableCell,
@@ -12,15 +20,26 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
-import { Launch, CloudDownload } from '@material-ui/icons';
-import Axios from 'axios';
+import { Launch, CloudDownload, Add } from '@material-ui/icons';
+import axios from 'axios';
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import { DateTime } from 'luxon';
 
 import { ProfilesEntity } from '../../../types/overview';
 import { Profile, TitlesEntity } from '../../../types/profile';
 import config from '../../../config';
 import { getTitle } from '../utils/title';
+import asu from '../../../utils/asu';
+import { GetBuildResponse } from '../../../types/asu';
+
+const useStyles = makeStyles(() => ({
+  chip: {
+    '&:focus': {
+      border: `2px solid #000`,
+    },
+  },
+}));
 
 type Props = {
   selectedVersion: string;
@@ -30,7 +49,15 @@ type Props = {
 const profilesData: { [key: string]: Profile } = {};
 
 const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedProfile }) => {
-  const [profile, setProfileData] = useState<Profile>();
+  const classes = useStyles();
+  const [profile, setProfile] = useState<Profile>();
+  const [showAddPackages, setShowAddPackages] = useState(false);
+  const [customPackages, setCustomPackages] = useState<Set<string>>(new Set());
+  const [customPackagesInputValue, setCustomPackagesInputValue] = useState<string>('');
+  const [showPackageExistsError, setShowPackageExistsError] = useState(false);
+  const [buildStatus, setBuildStatus] = useState<React.ReactNode>();
+  const [buildResponse, setBuildResponse] = useState<GetBuildResponse>();
+  const [buildError, setBuildError] = useState<string>();
   const { t } = useTranslation();
 
   const getHelpKey = (type: string) => {
@@ -56,12 +83,18 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     return 'other-help';
   };
 
+  const preExistingPackages = (_profile = profile) =>
+    Array.from(
+      new Set([...(_profile?.default_packages || []), ...(_profile?.device_packages || [])])
+    );
+
   const getProfileData = useCallback(async () => {
     let profileData = profilesData[selectedProfile.id];
 
     if (!profileData) {
-      const response = await Axios.get<Profile>(
-        `${process.env.PUBLIC_URL}/data/${selectedVersion}/${selectedProfile.target}/${selectedProfile.id}.json`
+      const response = await axios.get<Profile>(
+        `${process.env.PUBLIC_URL}/data/${selectedVersion}` +
+          `/${selectedProfile.target}/${selectedProfile.id}.json`
       );
       profileData = response.data;
       profilesData[selectedProfile.id] = profileData;
@@ -73,7 +106,10 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
   useEffect(() => {
     let mounted = true;
     getProfileData().then((_profileData) => {
-      if (mounted && !isEqual(profile, _profileData)) setProfileData(_profileData);
+      if (mounted && !isEqual(profile, _profileData)) {
+        setProfile(_profileData);
+        setCustomPackages(new Set(preExistingPackages(_profileData)));
+      }
     });
 
     return () => {
@@ -81,14 +117,64 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     };
   }, [selectedVersion, selectedProfile, getProfileData, profile]);
 
+  const toggleAddPackages = () => {
+    if (!profile) return;
+    setShowAddPackages(!showAddPackages);
+    setCustomPackages(new Set(preExistingPackages()));
+  };
+
+  const appendAddPackageInput = (
+    e?: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (((e && e.key === 'Enter') || !e) && customPackagesInputValue) {
+      setCustomPackages((prev) => {
+        setShowPackageExistsError(false);
+        if (
+          !profile?.device_packages?.includes(customPackagesInputValue) &&
+          !profile?.default_packages?.includes(customPackagesInputValue)
+        ) {
+          return new Set(prev.add(customPackagesInputValue));
+        }
+        setShowPackageExistsError(true);
+        return prev;
+      });
+      setCustomPackagesInputValue('');
+    }
+  };
+
+  const onBuildStatusChange = (status: string) => {
+    setBuildStatus(status);
+  };
+
   if (!profile) return <CircularProgress />;
 
-  const buildAt = new Date(profile.build_at);
+  const buildCustomImage = async () => {
+    setBuildStatus('Please wait...');
+    try {
+      const response = await asu.build(
+        Array.from(customPackages.values()),
+        profile.id,
+        profile.version_number,
+        onBuildStatusChange
+      );
+      setBuildResponse(response);
+    } catch (e) {
+      console.log(e);
+      setBuildError(e.response.data.message);
+    }
+    setBuildStatus(undefined);
+  };
+
+  const buildAt = DateTime.fromFormat(profile.build_at, 'yyyy-MM-dd TT').toLocaleString(
+    DateTime.DATETIME_MED
+  );
+  const hasAbilityToBuildCustomPackages = Object.keys(config).includes('asu_url');
+  const canBuild = !isEqual(Array.from(customPackages.values()), preExistingPackages());
 
   return (
     <>
       <Box paddingTop={3} paddingBottom={2}>
-        <Typography variant="h6" component="h1" align="left">
+        <Typography variant="h5" component="h3" align="left">
           {t('tr-version-build')}
         </Typography>
       </Box>
@@ -150,7 +236,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
         </Table>
       </TableContainer>
       <Box paddingTop={3} paddingBottom={2}>
-        <Typography variant="h6" component="h1" align="left">
+        <Typography variant="h5" component="h3" align="left">
           {t('tr-downloads')}
         </Typography>
       </Box>
@@ -188,6 +274,182 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
           </TableBody>
         </Table>
       </TableContainer>
+      <Box paddingTop={3} paddingBottom={2}>
+        <Typography variant="h5" component="h3" align="left">
+          {t('Packages')}
+        </Typography>
+      </Box>
+      {profile.default_packages && profile.default_packages.length > 0 && (
+        <Box mb={2}>
+          <Typography variant="h6" align="left">
+            {t('Default Packages')}
+          </Typography>
+          {profile.default_packages?.join(', ')}
+        </Box>
+      )}
+      {profile.device_packages && profile.device_packages.length > 0 && (
+        <Box mb={2}>
+          <Typography variant="h6" align="left">
+            {t('Device Packages')}
+          </Typography>
+          {profile.device_packages.join(', ')}
+        </Box>
+      )}
+      {hasAbilityToBuildCustomPackages && (
+        <Box>
+          {!showAddPackages && (
+            <Button variant="outlined" size="small" onClick={toggleAddPackages}>
+              customize packages
+            </Button>
+          )}
+          {showAddPackages && (
+            <>
+              <Typography variant="h6" align="left">
+                {t('Customize Packages')}
+                <Box display="inline-block" ml={2}>
+                  <Link href="https://openwrt.org/packages/table/start" target="_blank">
+                    <Typography variant="caption">find packages index on this page</Typography>
+                  </Link>
+                </Box>
+              </Typography>
+              <br />
+              {Array.from(customPackages.values()).map((p) => {
+                const isDefaultPackage = profile.default_packages?.includes(p);
+                return (
+                  <Box key={p} pr={1} pb={1} display="inline-block">
+                    <Chip
+                      size="small"
+                      label={p}
+                      color={isDefaultPackage ? 'default' : 'primary'}
+                      className={classes.chip}
+                      onDelete={
+                        isDefaultPackage
+                          ? undefined
+                          : () =>
+                              setCustomPackages((prev) => {
+                                const newSet = new Set(Array.from(prev.values()));
+                                newSet.delete(p);
+                                return newSet;
+                              })
+                      }
+                    />
+                  </Box>
+                );
+              })}
+              <br />
+              <FormControl size="small">
+                <InputLabel style={{ fontSize: '0.9em' }}>Custom Package Name</InputLabel>
+                <Input
+                  value={customPackagesInputValue}
+                  onChange={(e) => e && setCustomPackagesInputValue(e.currentTarget.value)}
+                  onKeyUp={appendAddPackageInput}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => appendAddPackageInput()}>
+                        <Add />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
+              {showPackageExistsError && (
+                <Box pt={2}>
+                  <Typography color="error" variant="caption" component="div">
+                    This profile already includes this package. Please try a diffrent one
+                  </Typography>
+                </Box>
+              )}
+              <Box mt={3}>
+                {!buildStatus && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!canBuild}
+                    onClick={buildCustomImage}
+                  >
+                    build customized image
+                  </Button>
+                )}
+                {buildStatus && (
+                  <>
+                    <Grid
+                      container
+                      alignContent="center"
+                      direction="row"
+                      alignItems="center"
+                      spacing={2}
+                    >
+                      {typeof buildStatus === 'string' && (
+                        <Grid item>
+                          <CircularProgress />
+                        </Grid>
+                      )}
+                      <Grid item>{buildStatus}</Grid>
+                    </Grid>
+                  </>
+                )}
+              </Box>
+            </>
+          )}
+          {buildError && <Typography color="error">{buildError}</Typography>}
+          {buildResponse && (
+            <Box mt={3}>
+              <Typography variant="h5">Built Image:</Typography>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Build At</TableCell>
+                    <TableCell id="title">
+                      {DateTime.fromFormat(
+                        buildResponse.build_at.substr(0, 25),
+                        'ccc, dd MMM yyyy TT',
+                        {
+                          zone: buildResponse.build_at.substr(26),
+                          setZone: true,
+                        }
+                      ).toLocaleString(DateTime.DATETIME_MED)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+              <br />
+              <br />
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Download link</TableCell>
+                    <TableCell>Help Text</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {buildResponse.images?.map((i) => {
+                    const downloadURL = `${config.image_url
+                      .replace('{target}', profile.target)
+                      .replace('{version}', profile.version_number)}/${i.name}`;
+                    return (
+                      <TableRow key={downloadURL + i.type}>
+                        <TableCell>
+                          <Link href={downloadURL} target="_blank" data-testid="download_link">
+                            <Button endIcon={<CloudDownload />} variant="contained" color="primary">
+                              {i.type}
+                            </Button>
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <Box p={1}>
+                            <Typography>{t(`tr-${getHelpKey(i.type)}`)}</Typography>
+                            <Typography variant="caption">sha256sum: {i.sha256}</Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Box>
+          )}
+        </Box>
+      )}
     </>
   );
 };

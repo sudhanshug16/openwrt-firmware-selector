@@ -1,42 +1,31 @@
 module.exports = {
-  extends: [
-    'airbnb-typescript',
-    'airbnb/hooks',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:jest/recommended',
-    'prettier',
-    'prettier/react',
-    'prettier/@typescript-eslint',
-    'plugin:prettier/recommended',
-  ],
-  plugins: ['react', '@typescript-eslint', 'jest'],
-  env: {
-    browser: true,
-    es6: true,
-    jest: true,
-  },
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
-  },
-  root: true,
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
+  parser: '@typescript-eslint/parser', // Specifies the ESLint parserx
+  plugins: ['react-hooks', 'prettier'],
+  settings: {
+    react: {
+      version: 'detect', // Tells eslint-plugin-react to automatically detect the version of React to use
     },
-    ecmaVersion: 2018,
-    sourceType: 'module',
-    project: './tsconfig.json',
   },
+  extends: [
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended', // Make sure this is always the last configuration in the extends array.
+    'plugin:jest/recommended',
+  ],
   rules: {
-    'linebreak-style': 'off',
+    // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
+    // Consider turning on eventually... lots of warnings though.
+    'max-len': ['error', 100],
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'react/react-in-jsx-scope': 'off',
+    // This rule is redundent when using arrow functions and we should only use arrow functions
     'react/prop-types': 'off',
-    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'prettier/prettier': [
       'error',
       {
-        endOfLine: 'auto',
+        trailingComma: 'all',
+        arrowParens: 'always',
+        printWidth: 100,
       },
     ],
   },

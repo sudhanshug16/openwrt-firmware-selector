@@ -5,7 +5,7 @@
 import React from 'react';
 import { fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 
-import Header from './Header';
+import Header from '.';
 
 const mockChangeLanguage = jest.fn();
 

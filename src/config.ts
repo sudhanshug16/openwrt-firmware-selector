@@ -5,10 +5,10 @@ const config = {
   show_help: true,
 
   // Path to overview.json file or URL to the ASU API
-  versions: { '19.07.5': 'data/19.07.5', SNAPSHOT: 'data/SNAPSHOT' },
+  versions: { '19.07.7': 'data/19.07.7', SNAPSHOT: 'data/SNAPSHOT' },
 
   // Pre-selected version (optional)
-  default_version: '19.07.5',
+  default_version: '19.07.7',
 
   // Image download URL (optional)
   image_url: 'https://downloads.openwrt.org/releases/{version}/targets/{target}',
@@ -18,7 +18,7 @@ const config = {
 
   // Build custom images (optional)
   // See https://github.com/aparcar/asu
-  // asu_url: 'https://chef.libremesh.org'
+  asu_url: 'https://chef.libremesh.org',
 };
 
 export default config;

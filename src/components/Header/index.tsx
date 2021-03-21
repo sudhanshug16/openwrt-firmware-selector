@@ -11,9 +11,11 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
+import { ReactSVG } from 'react-svg';
 
-import locales from '../locales';
-import '../App.scss';
+import logo from '../../images/logo-white.svg';
+import locales from '../../locales';
+import '../../App.scss';
 
 const Header: FunctionComponent = () => {
   const { t, i18n } = useTranslation();
@@ -32,8 +34,10 @@ const Header: FunctionComponent = () => {
   return (
     <AppBar position="sticky" className="header">
       <Toolbar>
-        <Typography variant="h6">{t('tr-title')}</Typography>
-        <span className="title-mobile">{t('tr-title')}</span>
+        <ReactSVG src={logo} className="logo" />
+        <Typography variant="h5" component="div">
+          {t('tr-title')}
+        </Typography>
         <div style={{ flexGrow: 1 }} />
         <Box position="relative">
           <Button

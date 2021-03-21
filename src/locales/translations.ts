@@ -1,9 +1,10 @@
+/* eslint-disable max-len */
 /* exported translations */
 
 const translations = {
   ca: {
     'tr-load': 'Descarregueu el microprogramari OpenWrt per al vostre dispositiu',
-    'tr-title': 'Selector de microprogramari OpenWrt',
+    'tr-title': 'Selector de microprogramari',
     'tr-message':
       'Introduïu el nom o el model del vostre dispositiu i seleccioneu la versió estable (per defecte) o la darrera imatge compilada ("snapshot")',
     'tr-version-build': 'Compilació',
@@ -35,7 +36,7 @@ const translations = {
     'tr-server-link': 'Files',
     'tr-notfound': 'No model found!',
     'tr-load': 'Download OpenWrt Firmware for your Device',
-    'tr-title': 'OpenWrt Firmware Selector',
+    'tr-title': 'Firmware Selector',
     'tr-message':
       'Type the name or model of your device, then select the recommended build or some other.',
     'tr-version-build': 'About this build',
@@ -65,7 +66,7 @@ const translations = {
   es: {
     'tr-notfound': '¡Modelo no encontrado!',
     'tr-load': 'Descargue el firmware OpenWrt para su dispositivo',
-    'tr-title': 'Selector de firmware OpenWrt',
+    'tr-title': 'Selector de firmware',
     'tr-message':
       'Escriba el nombre o modelo de su dispositivo, luego seleccione la versión recomendada o alguna otra.',
     'tr-version-build': 'Acerca de esta compilación',
@@ -95,7 +96,7 @@ const translations = {
   },
   no: {
     'tr-load': 'Last ned OpenWrt fastvare for din enhet!',
-    'tr-title': 'OpenWrt fastvare utvelger',
+    'tr-title': 'fastvare utvelger',
     'tr-message': 'Bruk feltene nedenfor for å laste ned fastvare til enheten din!',
     'tr-version-build': 'Sammensetning',
     'tr-custom-build': 'Tilpasset sammensetning',
@@ -126,7 +127,7 @@ const translations = {
     'tr-server-link': 'Dateien',
     'tr-notfound': 'Kein Model gefunden!',
     'tr-load': 'Lade die OpenWrt Firmware für dein Gerät!',
-    'tr-title': 'OpenWrt Firmware Selector',
+    'tr-title': 'Firmware Selector',
     'tr-message': 'Bitte benutze die Eingabe um die passende Firmware zu finden!',
     'tr-version-build': 'Release Build',
     'tr-custom-build': 'Custom Build',
@@ -185,7 +186,7 @@ const translations = {
   },
   it: {
     'tr-load': 'Scarica il firmware OpenWrt per il tuo dispositivo!',
-    'tr-title': 'OpenWrt Firmware Selector',
+    'tr-title': 'Firmware Selector',
     'tr-message': 'Usa la casella sottostante per scaricare il firmware per il tuo dispositivo!',
     'tr-version-build': 'Build',
     'tr-custom-build': 'Custom Build',
@@ -216,7 +217,7 @@ const translations = {
     'tr-server-link': 'Pliki',
     'tr-notfound': 'Nie znaleziono modelu!',
     'tr-load': 'Pobieranie oprogramowania OpenWrt',
-    'tr-title': 'OpenWrt Firmware Selector',
+    'tr-title': 'Firmware Selector',
     'tr-message':
       'Wprowadź nazwę lub model swojego urządzenia, a następnie wybierz wersję zalecaną lub inną.',
     'tr-version-build': 'Informacje o obrazie',
@@ -246,7 +247,7 @@ const translations = {
   },
   tr: {
     'tr-load': 'Cihazınız için OpenWrt yazılımını indirin!',
-    'tr-title': 'OpenWrt Yazılım Seçicisi',
+    'tr-title': 'Yazılım Seçicisi',
     'tr-message':
       'Cihazınızın adını/modelini girin, ardından Stabil sürümü(varsayılan) veya nightly "snapshot" imajini seçin.',
     'tr-version-build': 'Sürüm',

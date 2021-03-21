@@ -13,11 +13,46 @@ import Footer from './components/Footer';
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#3F51B5',
+      main: '#00B5E2',
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#009688',
+      main: '#212322',
     },
+  },
+  typography: {
+    h1: {
+      fontWeight: 600,
+    },
+    h2: {
+      fontWeight: 600,
+    },
+    h3: {
+      fontWeight: 600,
+    },
+    h4: {
+      fontWeight: 600,
+    },
+    h5: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+    fontFamily: [
+      'Open Sans',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      'Segoe UI',
+      'Roboto',
+      'Oxygen',
+      'Ubuntu',
+      'Cantarell',
+      'Fira Sans',
+      'Droid Sans',
+      'Helvetica Neue',
+      ,
+    ].join(','),
   },
 });
 
@@ -30,7 +65,7 @@ const App: FunctionComponent = () => {
           <Router>
             <Switch>
               <Route path="" exact component={Home} />
-              <Route default component={NotFound} />
+              <Route component={NotFound} />
             </Switch>
           </Router>
           <Footer />

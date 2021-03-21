@@ -46,6 +46,18 @@
 }
 
 .header {
+  .logo {
+    height: 40px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+
+    & svg {
+      height: 100%;
+      width: auto;
+    }
+  }
+
   .title-desktop {
     @media all and (max-width: 820px) {
       display: none;
@@ -74,7 +86,17 @@
   }
 }
 
+@media all and (min-width: 800px) {
+  .mobile {
+    display: none !important;
+  }
+}
+
 @media all and (max-width: 800px) {
+  .desktop {
+    display: none !important;
+  }
+
   .report-problem-container {
     font-size: 12px;
     padding: 10px;

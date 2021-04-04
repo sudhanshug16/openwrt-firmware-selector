@@ -45,6 +45,20 @@
   float: right;
 }
 
+.std-accordian {
+  overflow: hidden;
+
+  .MuiAccordionSummary-root {
+    background-color: #f3f3f3;
+  }
+
+  .std-textarea {
+    width: 100%;
+    border-radius: 5px;
+    font-family: monospace;
+  }
+}
+
 .header {
   .logo {
     height: 40px;

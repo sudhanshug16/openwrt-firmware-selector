@@ -28,14 +28,14 @@ const Home: FunctionComponent = () => {
               </Typography>
             </Box>
             <Grid container spacing={2}>
-              <Grid item xs>
+              <Grid item xs={12} md>
                 <ProfileSearch
                   selectedVersion={selectedVersion}
                   onProfileChange={setSelectedProfile}
                   data-testid="profile-search"
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <VersionSelector
                   data-testid="version-selector"
                   selectedVersion={selectedVersion}

@@ -1,5 +1,8 @@
 import React, { FunctionComponent, ReactNode, useCallback, useEffect, useState } from 'react';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   Chip,
@@ -20,7 +23,7 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
-import { Launch, CloudDownload, Add } from '@material-ui/icons';
+import { Launch, CloudDownload, Add, ExpandMore } from '@material-ui/icons';
 import axios from 'axios';
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -170,6 +173,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
   );
   const hasAbilityToBuildCustomPackages = Object.keys(config).includes('asu_url');
   const canBuild = !isEqual(Array.from(customPackages.values()), preExistingPackages());
+  const isBuilding = typeof buildStatus === 'string';
 
   return (
     <>
@@ -314,24 +318,21 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
               </Typography>
               <br />
               {Array.from(customPackages.values()).map((p) => {
-                const isDefaultPackage = profile.default_packages?.includes(p);
                 return (
                   <Box key={p} pr={1} pb={1} display="inline-block">
                     <Chip
                       size="small"
                       label={p}
-                      color={isDefaultPackage ? 'default' : 'primary'}
+                      color={isBuilding ? 'default' : 'primary'}
                       className={classes.chip}
-                      onDelete={
-                        isDefaultPackage
-                          ? undefined
-                          : () =>
-                              setCustomPackages((prev) => {
-                                const newSet = new Set(Array.from(prev.values()));
-                                newSet.delete(p);
-                                return newSet;
-                              })
-                      }
+                      onDelete={() => {
+                        if (!isBuilding)
+                          setCustomPackages((prev) => {
+                            const newSet = new Set(Array.from(prev.values()));
+                            newSet.delete(p);
+                            return newSet;
+                          });
+                      }}
                     />
                   </Box>
                 );
@@ -341,6 +342,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                 <InputLabel style={{ fontSize: '0.9em' }}>Custom Package Name</InputLabel>
                 <Input
                   value={customPackagesInputValue}
+                  disabled={isBuilding}
                   onChange={(e) => e && setCustomPackagesInputValue(e.currentTarget.value)}
                   onKeyUp={appendAddPackageInput}
                   endAdornment={
@@ -379,7 +381,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                       alignItems="center"
                       spacing={2}
                     >
-                      {typeof buildStatus === 'string' && (
+                      {isBuilding && (
                         <Grid item>
                           <CircularProgress />
                         </Grid>
@@ -414,38 +416,63 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
               </Table>
               <br />
               <br />
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Download link</TableCell>
-                    <TableCell>Help Text</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {buildResponse.images?.map((i) => {
-                    const downloadURL = `${config.image_url
-                      .replace('{target}', profile.target)
-                      .replace('{version}', profile.version_number)}/${i.name}`;
-                    return (
-                      <TableRow key={downloadURL + i.type}>
-                        <TableCell>
-                          <Link href={downloadURL} target="_blank" data-testid="download_link">
-                            <Button endIcon={<CloudDownload />} variant="contained" color="primary">
-                              {i.type}
-                            </Button>
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <Box p={1}>
-                            <Typography>{t(`tr-${getHelpKey(i.type)}`)}</Typography>
-                            <Typography variant="caption">sha256sum: {i.sha256}</Typography>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Download link</TableCell>
+                      <TableCell>Help Text</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {buildResponse.images?.map((i) => {
+                      // eslint-disable-next-line max-len
+                      const downloadURL = `${config.asu_url}/store/${buildResponse.bin_dir}/${i.name}`;
+                      return (
+                        <TableRow key={downloadURL + i.type}>
+                          <TableCell>
+                            <Link href={downloadURL} target="_blank" data-testid="download_link">
+                              <Button
+                                endIcon={<CloudDownload />}
+                                variant="contained"
+                                color="primary"
+                              >
+                                {i.type}
+                              </Button>
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <Box p={1}>
+                              <Typography>{t(`tr-${getHelpKey(i.type)}`)}</Typography>
+                              <Typography variant="caption">sha256sum: {i.sha256}</Typography>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <br />
+              <br />
+              <div>
+                <Accordion className="std-accordian">
+                  <AccordionSummary expandIcon={<ExpandMore />}>Stderr</AccordionSummary>
+                  <AccordionDetails>
+                    <textarea rows={15} disabled className="std-textarea">
+                      {buildResponse.stderr}
+                    </textarea>
+                  </AccordionDetails>
+                </Accordion>
+                <Accordion className="std-accordian">
+                  <AccordionSummary expandIcon={<ExpandMore />}>Stdout</AccordionSummary>
+                  <AccordionDetails>
+                    <textarea rows={15} disabled className="std-textarea">
+                      {buildResponse.stdout}
+                    </textarea>
+                  </AccordionDetails>
+                </Accordion>
+              </div>
             </Box>
           )}
         </Box>

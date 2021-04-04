@@ -1,19 +1,10 @@
 import React, { FunctionComponent, useRef } from 'react';
 import TranslateIcon from '@material-ui/icons/Translate';
-import {
-  AppBar,
-  Box,
-  Button,
-  Menu,
-  MenuItem,
-  Checkbox,
-  Toolbar,
-  Typography,
-} from '@material-ui/core';
+import { AppBar, Box, Button, Menu, MenuItem, Checkbox, Toolbar } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { ReactSVG } from 'react-svg';
 
-import logo from '../../images/logo-white.svg';
+import logo from '../../images/logo.svg';
 import locales from '../../locales';
 import '../../App.scss';
 
@@ -35,9 +26,6 @@ const Header: FunctionComponent = () => {
     <AppBar position="sticky" className="header">
       <Toolbar>
         <ReactSVG src={logo} className="logo" />
-        <Typography variant="h5" component="div">
-          {t('tr-title')}
-        </Typography>
         <div style={{ flexGrow: 1 }} />
         <Box position="relative">
           <Button

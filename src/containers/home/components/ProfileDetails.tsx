@@ -35,6 +35,7 @@ import config from '../../../config';
 import { getTitle } from '../utils/title';
 import asu from '../../../utils/asu';
 import { GetBuildResponse } from '../../../types/asu';
+import { getAsuDownloadLink, getStockDownloadLink } from '../utils/links';
 
 const useStyles = makeStyles(() => ({
   chip: {
@@ -153,9 +154,11 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
 
   const buildCustomImage = async () => {
     setBuildStatus('Please wait...');
+    setBuildError(undefined);
     try {
       const response = await asu.build(
         Array.from(customPackages.values()),
+        profile.target,
         profile.id,
         profile.version_number,
         onBuildStatusChange
@@ -254,9 +257,11 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
           </TableHead>
           <TableBody>
             {profile.images?.map((i) => {
-              const downloadURL = `${config.image_url
-                .replace('{target}', profile.target)
-                .replace('{version}', profile.version_number)}/${i.name}`;
+              const downloadURL = getStockDownloadLink(
+                profile.version_number,
+                profile.target,
+                i.name
+              );
               return (
                 <TableRow key={downloadURL + i.type}>
                   <TableCell>
@@ -426,8 +431,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                   </TableHead>
                   <TableBody>
                     {buildResponse.images?.map((i) => {
-                      // eslint-disable-next-line max-len
-                      const downloadURL = `${config.asu_url}/store/${buildResponse.bin_dir}/${i.name}`;
+                      const downloadURL = getAsuDownloadLink(buildResponse.bin_dir, i.name);
                       return (
                         <TableRow key={downloadURL + i.type}>
                           <TableCell>

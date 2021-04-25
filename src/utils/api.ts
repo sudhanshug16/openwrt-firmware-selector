@@ -3,8 +3,9 @@ import config from '../config';
 import { GetBuildResponse } from '../types/asu';
 
 const asu = {
-  buildNew: (packages: string[], profile: string, version: string) =>
+  buildNew: (packages: string[], target: string, profile: string, version: string) =>
     axios.post<GetBuildResponse>(`${config.asu_url}/api/build`, {
+      target,
       version,
       profile,
       packages,

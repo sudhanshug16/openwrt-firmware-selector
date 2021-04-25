@@ -3,11 +3,12 @@ import { sleep } from './common';
 
 const build = async (
   packages: string[],
+  target: string,
   profile: string,
   version: string,
   buildStatusCallback: (status: string) => void
 ) => {
-  const buildResponse = await api.asu.buildNew(packages, profile, version);
+  const buildResponse = await api.asu.buildNew(packages, target, profile, version);
   if (buildResponse.status === 202) {
     buildStatusCallback(`#${buildResponse} in queue`);
   }

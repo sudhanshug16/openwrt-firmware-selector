@@ -52,6 +52,12 @@
     background-color: #f3f3f3;
   }
 
+  code {
+    max-height: 300px;
+    overflow: auto;
+    width: 100%;
+  }
+
   .std-textarea {
     width: 100%;
     border-radius: 5px;

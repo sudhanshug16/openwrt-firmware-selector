@@ -1,4 +1,4 @@
-# OpenWrt Firmware Selector Wizard [![codecov](https://codecov.io/gh/sudhanshu16/openwrt-firmware-selector/branch/master/graph/badge.svg?token=F26634D0PG)](https://codecov.io/gh/sudhanshu16/openwrt-firmware-selector)
+# OpenWrt Firmware Selector [![codecov](https://codecov.io/gh/sudhanshu16/openwrt-firmware-selector/branch/master/graph/badge.svg?token=F26634D0PG)](https://codecov.io/gh/sudhanshu16/openwrt-firmware-selector)
 
 A simple OpenWrt firmware selector using autocompletion.
 
@@ -16,6 +16,19 @@ You can set it up easily:
 2. Use [yarn](https://yarnpkg.com/en/) to install package dependencies  
    `yarn install`
 3. Run `scripts/collect.py` to generate required JSON files.
+
+   Format:
+
+   ```sh
+   ./scripts/collect.py --image-url <image_url> <release_src> <config_path> <output_path>
+   ```
+
+   Example:
+
+   ```sh
+   ./scripts/collect.py --image-url 'https://downloads.openwrt.org/{base}/{target}' https://downloads.openwrt.org ./src ./public/
+   ```
+
 4. Use the following command to start a dev server:  
    `yarn start`
 

@@ -98,7 +98,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     if (!profileData) {
       const response = await axios.get<Profile>(
         `${process.env.PUBLIC_URL}/data/${selectedVersion}` +
-          `/${selectedProfile.target}/${selectedProfile.id}.json`
+          `/${selectedProfile.target}/${selectedProfile.id}.json?t=${new Date().getTime()}`
       );
       profileData = response.data;
       profilesData[selectedProfile.id] = profileData;
@@ -460,6 +460,19 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
               <br />
               <br />
               <div>
+                <Accordion className="std-accordian">
+                  <AccordionSummary expandIcon={<ExpandMore />}>Manifest</AccordionSummary>
+                  <AccordionDetails>
+                    <code>
+                      {Object.keys(buildResponse.manifest).map((e) => (
+                        <>
+                          {e}: {buildResponse.manifest[e]}
+                          <br />
+                        </>
+                      ))}
+                    </code>
+                  </AccordionDetails>
+                </Accordion>
                 <Accordion className="std-accordian">
                   <AccordionSummary expandIcon={<ExpandMore />}>Stderr</AccordionSummary>
                   <AccordionDetails>

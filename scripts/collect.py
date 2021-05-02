@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Tool to create overview.json files and update the config.ts.
+source: https://github.com/mwarning/openwrt-firmware-selector
 """
 
 from pathlib import Path
@@ -153,7 +154,7 @@ def write_data(releases, args):
 """
 Scrape profiles.json using wget (slower but more generic).
 Merge into overview.json files.
-Update config.json.
+Update config.ts.
 """
 
 
@@ -194,7 +195,7 @@ def scrape(args):
 """
 Scan a local directory for releases with profiles.json.
 Merge into overview.json files.
-Update config.json.
+Update config.ts.
 """
 
 

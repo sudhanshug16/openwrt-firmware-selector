@@ -30,7 +30,9 @@ const ProfileSearch: FunctionComponent<Props> = ({ selectedVersion, onProfileCha
     toggleWorking(true);
 
     if (!overview) {
-      const overviewPath = `${process.env.PUBLIC_URL}/data/${selectedVersion}/overview.json`;
+      const overviewPath = `${
+        process.env.PUBLIC_URL
+      }/data/${selectedVersion}/overview.json?t=${new Date().getTime()}`;
       const response = await Axios.get<Overview>(overviewPath);
       overview = response.data;
       overviewData[selectedVersion] = overview;

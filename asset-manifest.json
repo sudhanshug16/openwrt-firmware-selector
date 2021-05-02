@@ -1,23 +1,23 @@
 {
   "files": {
-    "main.css": "/openwrt-firmware-selector/static/css/main.dd610d39.chunk.css",
-    "main.js": "/openwrt-firmware-selector/static/js/main.7113e808.chunk.js",
-    "main.js.map": "/openwrt-firmware-selector/static/js/main.7113e808.chunk.js.map",
-    "runtime-main.js": "/openwrt-firmware-selector/static/js/runtime-main.3ca648bc.js",
-    "runtime-main.js.map": "/openwrt-firmware-selector/static/js/runtime-main.3ca648bc.js.map",
-    "static/js/2.4756f96d.chunk.js": "/openwrt-firmware-selector/static/js/2.4756f96d.chunk.js",
-    "static/js/2.4756f96d.chunk.js.map": "/openwrt-firmware-selector/static/js/2.4756f96d.chunk.js.map",
-    "static/js/3.07d7ffcc.chunk.js": "/openwrt-firmware-selector/static/js/3.07d7ffcc.chunk.js",
-    "static/js/3.07d7ffcc.chunk.js.map": "/openwrt-firmware-selector/static/js/3.07d7ffcc.chunk.js.map",
+    "main.css": "/openwrt-firmware-selector/static/css/main.50cda67b.chunk.css",
+    "main.js": "/openwrt-firmware-selector/static/js/main.6ada876a.chunk.js",
+    "main.js.map": "/openwrt-firmware-selector/static/js/main.6ada876a.chunk.js.map",
+    "runtime-main.js": "/openwrt-firmware-selector/static/js/runtime-main.fac8338e.js",
+    "runtime-main.js.map": "/openwrt-firmware-selector/static/js/runtime-main.fac8338e.js.map",
+    "static/js/2.202489af.chunk.js": "/openwrt-firmware-selector/static/js/2.202489af.chunk.js",
+    "static/js/2.202489af.chunk.js.map": "/openwrt-firmware-selector/static/js/2.202489af.chunk.js.map",
+    "static/js/3.ad85f3f5.chunk.js": "/openwrt-firmware-selector/static/js/3.ad85f3f5.chunk.js",
+    "static/js/3.ad85f3f5.chunk.js.map": "/openwrt-firmware-selector/static/js/3.ad85f3f5.chunk.js.map",
     "index.html": "/openwrt-firmware-selector/index.html",
-    "static/css/main.dd610d39.chunk.css.map": "/openwrt-firmware-selector/static/css/main.dd610d39.chunk.css.map",
-    "static/js/2.4756f96d.chunk.js.LICENSE.txt": "/openwrt-firmware-selector/static/js/2.4756f96d.chunk.js.LICENSE.txt",
+    "static/css/main.50cda67b.chunk.css.map": "/openwrt-firmware-selector/static/css/main.50cda67b.chunk.css.map",
+    "static/js/2.202489af.chunk.js.LICENSE.txt": "/openwrt-firmware-selector/static/js/2.202489af.chunk.js.LICENSE.txt",
     "static/media/logo.ad9c7e35.svg": "/openwrt-firmware-selector/static/media/logo.ad9c7e35.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.3ca648bc.js",
-    "static/js/2.4756f96d.chunk.js",
-    "static/css/main.dd610d39.chunk.css",
-    "static/js/main.7113e808.chunk.js"
+    "static/js/runtime-main.fac8338e.js",
+    "static/js/2.202489af.chunk.js",
+    "static/css/main.50cda67b.chunk.css",
+    "static/js/main.6ada876a.chunk.js"
   ]
 }

@@ -2,5 +2,9 @@
   "trailingComma": "es5",
   "printWidth": 100,
   "semi": true,
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
   "singleQuote": true
 }

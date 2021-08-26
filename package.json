@@ -8,6 +8,7 @@
     "@material-ui/icons": "^4.2.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@material-ui/styles": "^4.11.2",
+    "autosuggest-highlight": "^3.1.1",
     "axios": "^0.21.1",
     "gh-pages": "^2.0.1",
     "i18next": "^17.0.4",
@@ -22,6 +23,7 @@
     "react-scripts": "4.0.1",
     "react-svg": "^12.1.0",
     "react-use": "^15.3.8",
+    "types": "^0.1.1",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
@@ -50,6 +52,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/react": "^11.2.3",
+    "@types/autosuggest-highlight": "^3.1.1",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.167",
     "@types/luxon": "^1.26.2",

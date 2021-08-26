@@ -22,10 +22,17 @@ export type EntryData = {
   error: string;
 };
 
+export type Model = {
+  value: string;
+  title: string;
+};
+
 function UseFetchProfiles(version: string) {
   const [modelSearchData, setModelSearchData] = useState<Array<any>>([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  console.log(modelSearchData);
 
   useEffect(() => {
     if (!version) return;

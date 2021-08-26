@@ -1,17 +1,20 @@
-import React, { FunctionComponent, useState } from 'react';
-import { Container, Paper, Box, Typography, Grid } from '@material-ui/core';
+import React, { Suspense, FunctionComponent, useState } from 'react';
+import { Container, Paper, Box, Typography, Grid, CircularProgress } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import ProfileSearch from './components/ProfileSearch';
 import VersionSelector from './components/VersionSelector';
 import ProfileDetails from './components/ProfileDetails';
 import config from '../../config';
 import { ProfilesEntity } from '../../types/overview';
+import useFetchEntryData from './components/use-fetch-entry-data';
 
 const Home: FunctionComponent = () => {
   const [selectedVersion, setSelectedVersion] = useState(Object.keys(config.versions)[0]);
   const [selectedProfile, setSelectedProfile] = useState<ProfilesEntity | null>();
   const { t } = useTranslation();
+  const entryData = useFetchEntryData(selectedVersion);
 
+  if (!entryData) return <p>Loading...</p>;
   return (
     <Container>
       <Box paddingY={4}>
@@ -29,11 +32,16 @@ const Home: FunctionComponent = () => {
             </Box>
             <Grid container spacing={2}>
               <Grid item xs={12} md>
-                <ProfileSearch
-                  selectedVersion={selectedVersion}
-                  onProfileChange={setSelectedProfile}
-                  data-testid="profile-search"
-                />
+                <Suspense fallback={<CircularProgress />}>
+                  {entryData && entryData[1] && (
+                    <ProfileSearch
+                      branchVersion={entryData[1] as string}
+                      selectedVersion={selectedVersion}
+                      onProfileChange={setSelectedProfile}
+                      data-testid="profile-search"
+                    />
+                  )}
+                </Suspense>
               </Grid>
               <Grid item xs={12} md={3}>
                 <VersionSelector

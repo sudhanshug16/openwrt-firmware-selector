@@ -1,18 +1,13 @@
-import React, { Suspense, FunctionComponent, useState } from 'react';
-import { Container, Paper, Box, Typography, Grid, CircularProgress } from '@material-ui/core';
+import { Box, CircularProgress, Container, Grid, Paper, Typography } from '@material-ui/core';
+import React, { FC, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import ProfileSearch from './components/ProfileSearch';
-import VersionSelector from './components/VersionSelector';
-import ProfileDetails from './components/ProfileDetails';
-import config from '../../config';
-import { ProfilesEntity } from '../../types/overview';
+import { Overview } from './components/types';
 import useFetchEntryData from './components/use-fetch-entry-data';
+import VersionSelector from './components/VersionSelector';
 
-const Home: FunctionComponent = () => {
-  const [selectedVersion, setSelectedVersion] = useState(Object.keys(config.versions)[0]);
-  const [selectedProfile, setSelectedProfile] = useState<ProfilesEntity | null>();
+const Home: FC = () => {
+  const entryData = useFetchEntryData();
   const { t } = useTranslation();
-  const entryData = useFetchEntryData(selectedVersion);
 
   if (!entryData) return <p>Loading...</p>;
   return (
@@ -33,32 +28,25 @@ const Home: FunctionComponent = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} md>
                 <Suspense fallback={<CircularProgress />}>
-                  {entryData && entryData[1] && (
-                    <ProfileSearch
-                      branchVersion={entryData[1] as string}
-                      selectedVersion={selectedVersion}
-                      onProfileChange={setSelectedProfile}
-                      data-testid="profile-search"
+                  {entryData.length && (
+                    <VersionSelector
+                      data-testid="version-selector"
+                      versions={entryData[1] as string[]}
+                      branchVersion={[entryData[0]] as Overview[]}
                     />
                   )}
                 </Suspense>
               </Grid>
-              <Grid item xs={12} md={3}>
-                <VersionSelector
-                  data-testid="version-selector"
-                  selectedVersion={selectedVersion}
-                  onVersionChange={setSelectedVersion}
-                />
-              </Grid>
+              <Grid item xs={12} md={3}></Grid>
             </Grid>
-            {selectedProfile && (
-              <Box>
-                <ProfileDetails
+            {/* {selectedProfile && ( */}
+            {/* <Box> */}
+            {/* <ProfileDetails
                   selectedProfile={selectedProfile}
                   selectedVersion={selectedVersion}
-                />
-              </Box>
-            )}
+                /> */}
+            {/* </Box> */}
+            {/* )} */}
           </Box>
         </Paper>
       </Box>

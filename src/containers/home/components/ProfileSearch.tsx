@@ -9,21 +9,17 @@ import useFetchProfiles from './use-fetch-version-profiles';
 
 type Props = {
   selectedVersion: string;
-  onProfileChange: (profile: ProfilesEntity) => void;
-  branchVersion: string;
+  onProfileChange?: (profile: ProfilesEntity) => void;
+  currentBranch: string;
 };
 
 type SearchData = { value: ProfilesEntity; search: string; title: string };
 
-const ProfileSearch: FunctionComponent<Props> = ({ onProfileChange, branchVersion }) => {
+const ProfileSearch: FunctionComponent<Props> = ({ selectedVersion }) => {
   const { t } = useTranslation();
-  const profiles = useFetchProfiles(branchVersion);
+  const profiles = useFetchProfiles(selectedVersion);
 
   const modelSearchData = (profiles[0] as unknown) as SearchData[];
-
-  const handleProfileSelect = (_: unknown, searchDataRow: SearchData | null) => {
-    if (searchDataRow) onProfileChange(searchDataRow.value);
-  };
 
   if (!modelSearchData) return <CircularProgress />;
 
@@ -48,7 +44,6 @@ const ProfileSearch: FunctionComponent<Props> = ({ onProfileChange, branchVersio
           </div>
         );
       }}
-      onChange={handleProfileSelect}
     />
   );
 };

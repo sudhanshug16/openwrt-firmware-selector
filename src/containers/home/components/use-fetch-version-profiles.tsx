@@ -3,36 +3,20 @@ import { useEffect, useState } from 'react';
 import { TitlesEntity } from '../../../types/overview';
 import { getTitle } from '../utils/title';
 
-export type Overview = {
-  enabled: boolean;
-  extra_repos: [];
-  git_branch: string;
-  name: string;
-  path: string;
-  path_packages: string;
-  pubkey: string;
-  repos: Array<string>;
-  targets: [];
-};
-
-export type EntryData = {
-  version: string;
-  entryData: Overview;
-  loading: boolean;
-  error: string;
+type Value = {
+  titles: string;
 };
 
 export type Model = {
-  value: string;
+  search: string;
   title: string;
+  value: Value[];
 };
 
 function UseFetchProfiles(version: string) {
   const [modelSearchData, setModelSearchData] = useState<Array<any>>([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  console.log(modelSearchData);
 
   useEffect(() => {
     if (!version) return;
@@ -66,7 +50,7 @@ function UseFetchProfiles(version: string) {
       }
     };
     request();
-  }, []);
+  }, [version]);
   return [modelSearchData, { loading }, { error }];
 }
 

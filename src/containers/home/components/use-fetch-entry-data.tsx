@@ -1,28 +1,10 @@
 import Axios from 'axios';
 import { useEffect, useState } from 'react';
+import { Overview, AdditionalProp } from './types';
 
-export type Overview = {
-  enabled: boolean;
-  extra_repos: [];
-  git_branch: string;
-  name: string;
-  path: string;
-  path_packages: string;
-  pubkey: string;
-  repos: Array<string>;
-  targets: [];
-};
-
-export type EntryData = {
-  version: string;
-  entryData: Overview;
-  loading: boolean;
-  error: string;
-};
-
-function UseFetchEntryData(selectedVersion: string) {
-  const [entryData, setEntryData] = useState<EntryData>();
-  const [version, setVersion] = useState<string>();
+function UseFetchEntryData() {
+  const [entryData, setEntryData] = useState<Overview>();
+  const [versions, setVersions] = useState<string[]>();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,13 +13,18 @@ function UseFetchEntryData(selectedVersion: string) {
     const request = async () => {
       try {
         const res = await Axios.get(`${baseUrl}/api/v1/overview`);
-        const { branches } = res.data;
-        const filteredByVersion: any = Object.fromEntries(
-          Object.entries(branches).filter(([key]) => selectedVersion.includes(key))
-        );
-        const data = filteredByVersion[Object.keys(filteredByVersion).join('')];
-        setEntryData(data);
-        setVersion(data.versions[0]);
+        if (res.data) {
+          setEntryData(res.data);
+
+          const { branches } = res.data;
+
+          const temp: string[][] = [];
+          const arrayFromBranches: [string, AdditionalProp][] = Object.entries(branches);
+          arrayFromBranches.forEach((item) => {
+            temp.push(item[1].versions);
+          });
+          setVersions(temp.flat(3));
+        }
       } catch (err) {
         setError(err);
       } finally {
@@ -46,7 +33,8 @@ function UseFetchEntryData(selectedVersion: string) {
     };
     request();
   }, []);
-  return [{ entryData }, version, { loading }, { error }];
+  if (!entryData) return;
+  return [entryData, versions, { loading }, { error }];
 }
 
 export default UseFetchEntryData;

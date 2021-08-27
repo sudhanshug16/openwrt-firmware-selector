@@ -5,14 +5,9 @@ const config = {
   show_help: true,
 
   // Path to overview.json file or URL to the ASU API
-  versions: {
-    '19.07.7': 'data/19.07.7',
-    '21.02.0-rc1': 'data/21.02.0-rc1',
-    SNAPSHOT: 'data/SNAPSHOT',
-  },
 
   // Pre-selected version (optional)
-  default_version: '19.07.7',
+  default_version: '19.07.8',
 
   // Image download URL (optional)
   base_url: 'https://downloads.openwrt.org',

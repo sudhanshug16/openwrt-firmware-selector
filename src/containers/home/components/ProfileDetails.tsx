@@ -28,7 +28,6 @@ import axios from 'axios';
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { DateTime } from 'luxon';
-
 import { ProfilesEntity } from '../../../types/overview';
 import { Profile, TitlesEntity } from '../../../types/profile';
 import config from '../../../config';
@@ -48,11 +47,12 @@ const useStyles = makeStyles(() => ({
 type Props = {
   selectedVersion: string;
   selectedProfile: ProfilesEntity;
+  path: string;
 };
 
 const profilesData: { [key: string]: Profile } = {};
 
-const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedProfile }) => {
+const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedProfile, path }) => {
   const classes = useStyles();
   const [profile, setProfile] = useState<Profile>();
   const [showAddPackages, setShowAddPackages] = useState(false);
@@ -96,10 +96,13 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     let profileData = profilesData[selectedProfile.id];
 
     if (!profileData) {
+      const baseUrl = 'https://asu.aparcar.org';
       const response = await axios.get<Profile>(
-        `${process.env.PUBLIC_URL}/data/${selectedVersion}` +
-          `/${selectedProfile.target}/${selectedProfile.id}.json?t=${new Date().getTime()}`
+        `${baseUrl}/json/v1/${path.replace('{version}', selectedVersion)}/targets/${
+          selectedProfile.target
+        }/${selectedProfile.id}.json?t=${new Date().getTime()}`
       );
+
       profileData = response.data;
       profilesData[selectedProfile.id] = profileData;
     }
@@ -155,6 +158,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
   const buildCustomImage = async () => {
     setBuildStatus('Please wait...');
     setBuildError(undefined);
+
     try {
       const response = await asu.build(
         Array.from(customPackages.values()),
@@ -171,9 +175,10 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     setBuildStatus(undefined);
   };
 
-  const buildAt = DateTime.fromFormat(profile.build_at, 'yyyy-MM-dd TT').toLocaleString(
-    DateTime.DATETIME_MED
-  );
+  const buildAt = profile.build_at
+    ? DateTime.fromFormat(profile.build_at, 'yyyy-MM-dd TT').toLocaleString(DateTime.DATETIME_MED)
+    : null;
+
   const hasAbilityToBuildCustomPackages = Object.keys(config).includes('asu_url');
   const canBuild = !isEqual(Array.from(customPackages.values()), preExistingPackages());
   const isBuilding = typeof buildStatus === 'string';
@@ -205,10 +210,12 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                 {profile.version_number} ({profile.version_code})
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell>{t('tr-date')}</TableCell>
-              <TableCell>{buildAt.toLocaleString()}</TableCell>
-            </TableRow>
+            {buildAt && (
+              <TableRow>
+                <TableCell>{t('tr-date')}</TableCell>
+                <TableCell>{buildAt.toLocaleString()}</TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell>Info</TableCell>
               <TableCell>
@@ -243,7 +250,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
         </Table>
       </TableContainer>
       <Box paddingTop={3} paddingBottom={2}>
-        <Typography variant="h5" component="h3" align="left">
+        {/*  <Typography variant="h5" component="h3" align="left">
           {t('tr-downloads')}
         </Typography>
       </Box>
@@ -286,7 +293,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
       <Box paddingTop={3} paddingBottom={2}>
         <Typography variant="h5" component="h3" align="left">
           {t('Packages')}
-        </Typography>
+        </Typography>*/}
       </Box>
       {profile.default_packages && profile.default_packages.length > 0 && (
         <Box mb={2}>

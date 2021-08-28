@@ -1,15 +1,21 @@
-import { Box, CircularProgress, Container, Grid, Paper, Typography } from '@material-ui/core';
-import React, { FC, Suspense } from 'react';
+import React, { Suspense, FunctionComponent, useState } from 'react';
+import { Container, Paper, Box, Typography, Grid, CircularProgress } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
-import { Overview } from './components/types';
-import useFetchEntryData from './components/use-fetch-entry-data';
+import ProfileSearch from './components/ProfileSearch';
 import VersionSelector from './components/VersionSelector';
+import ProfileDetails from './components/ProfileDetails';
+import config from '../../config';
+import { ProfilesEntity } from '../../types/overview';
+import useFetchEntryData from './components/use-fetch-entry-data';
+import { Overview } from './components/types';
 
-const Home: FC = () => {
+const Home: FunctionComponent = () => {
   const entryData = useFetchEntryData();
   const { t } = useTranslation();
 
   if (!entryData) return <p>Loading...</p>;
+  const versions = entryData[1];
+
   return (
     <Container>
       <Box paddingY={4}>
@@ -26,26 +32,23 @@ const Home: FC = () => {
               </Typography>
             </Box>
             <Grid container spacing={2}>
-              <Grid item xs={12} md>
-                <Suspense fallback={<CircularProgress />}>
-                  {entryData.length && (
-                    <VersionSelector
-                      data-testid="version-selector"
-                      versions={entryData[1] as string[]}
-                      branchVersion={[entryData[0]] as Overview[]}
-                    />
-                  )}
-                </Suspense>
-              </Grid>
-              <Grid item xs={12} md={3}></Grid>
+              <Suspense fallback={<CircularProgress />}>
+                {versions && (
+                  <VersionSelector
+                    data-testid="version-selector"
+                    versions={versions as string[]}
+                    branchVersion={[entryData[0]] as Overview[]}
+                  />
+                )}
+              </Suspense>
             </Grid>
             {/* {selectedProfile && ( */}
-            {/* <Box> */}
-            {/* <ProfileDetails
+            <Box>
+              {/* <ProfileDetails
                   selectedProfile={selectedProfile}
                   selectedVersion={selectedVersion}
                 /> */}
-            {/* </Box> */}
+            </Box>
             {/* )} */}
           </Box>
         </Paper>

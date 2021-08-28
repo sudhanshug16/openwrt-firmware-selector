@@ -13,7 +13,7 @@ export type Model = {
   value: Value[];
 };
 
-function UseFetchProfiles(version: string, path: string) {
+function UseFetchProfiles(version: string) {
   const [modelSearchData, setModelSearchData] = useState<Array<any>>([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,9 +23,7 @@ function UseFetchProfiles(version: string, path: string) {
     const baseUrl = 'https://asu.aparcar.org';
     const request = async () => {
       try {
-        const res = await Axios.get(
-          `${baseUrl}/json/v1/${path.replace('{version}', version)}/overview.json`
-        );
+        const res = await Axios.get(`${baseUrl}/json/v1/releases/${version}/overview.json`);
 
         const versionProfiles = res.data.profiles;
 
@@ -53,7 +51,7 @@ function UseFetchProfiles(version: string, path: string) {
     };
     request();
   }, [version]);
-  return [modelSearchData, path, { loading }, { error }];
+  return [modelSearchData, { loading }, { error }];
 }
 
 export default UseFetchProfiles;

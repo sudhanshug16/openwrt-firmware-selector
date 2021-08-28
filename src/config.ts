@@ -19,7 +19,7 @@ const config = {
 
   // Build custom images (optional)
   // See https://github.com/aparcar/asu
-  asu_url: 'https://chef.libremesh.org',
+  asu_url: 'https://asu.aparcar.org',
 };
 
 export default config;

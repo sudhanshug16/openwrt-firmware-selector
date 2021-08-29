@@ -43,14 +43,7 @@ const VersionSelector: FC<Props> = ({ versions, branchVersion }) => {
 
   if (!default_version) return <p>Loading</p>;
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md>
-        <ProfileSearch
-          selectedVersion={version ? version : default_version}
-          currentBranch={currentBranch.flat(2)[0] as string}
-          path={path}
-        />
-      </Grid>
+    <Grid container spacing={2} direction="row-reverse">
       <Grid item xs={12} md={3}>
         <FormControl fullWidth variant="outlined">
           <InputLabel id="version-select-label">{t('tr-version')}</InputLabel>
@@ -68,6 +61,13 @@ const VersionSelector: FC<Props> = ({ versions, branchVersion }) => {
             ))}
           </Select>
         </FormControl>
+      </Grid>
+      <Grid item xs={12} md>
+        <ProfileSearch
+          selectedVersion={version ? version : default_version}
+          currentBranch={currentBranch.flat(2)[0] as string}
+          path={path}
+        />
       </Grid>
     </Grid>
   );

@@ -96,9 +96,9 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     let profileData = profilesData[selectedProfile.id];
 
     if (!profileData) {
-      const baseUrl = 'https://asu.aparcar.org';
+      const { base_url } = config;
       const response = await axios.get<Profile>(
-        `${baseUrl}/json/v1/${path.replace('{version}', selectedVersion)}/targets/${
+        `${base_url}/json/v1/${path.replace('{version}', selectedVersion)}/targets/${
           selectedProfile.target
         }/${selectedProfile.id}.json?t=${new Date().getTime()}`
       );
@@ -124,11 +124,11 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     };
   }, [selectedVersion, selectedProfile, getProfileData, profile]);
 
-  const toggleAddPackages = () => {
-    if (!profile) return;
-    setShowAddPackages(!showAddPackages);
-    setCustomPackages(new Set(preExistingPackages()));
-  };
+  // const toggleAddPackages = () => {
+  //   if (!profile) return;
+  //   setShowAddPackages(!showAddPackages);
+  //   setCustomPackages(new Set(preExistingPackages()));
+  // };
 
   const appendAddPackageInput = (
     e?: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -168,8 +168,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
         onBuildStatusChange
       );
       setBuildResponse(response);
-    } catch (e) {
-      console.log(e);
+    } catch (e: unknown) {
       setBuildError(e.response.data.message);
     }
     setBuildStatus(undefined);
@@ -212,7 +211,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
             {buildAt && (
               <TableRow>
                 <TableCell>{t('tr-date')}</TableCell>
-                <TableCell>{buildAt.toLocaleString()}</TableCell>
+                <TableCell>{buildAt}</TableCell>
               </TableRow>
             )}
             <TableRow>

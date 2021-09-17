@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import { useEffect, useState } from 'react';
+import config from '../../../config';
 import { Overview, AdditionalProp } from './types';
 
 function UseFetchEntryData() {
@@ -9,10 +10,10 @@ function UseFetchEntryData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const baseUrl = 'https://asu.aparcar.org';
+    const { base_url } = config;
     const request = async () => {
       try {
-        const res = await Axios.get(`${baseUrl}/api/v1/overview`);
+        const res = await Axios.get(`${base_url}/api/v1/overview`);
         if (res.data) {
           setEntryData(res.data);
 

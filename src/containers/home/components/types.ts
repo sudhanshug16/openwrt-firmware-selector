@@ -37,9 +37,3 @@ export type Branches = {
   additionalProp2: AdditionalProp;
   additionalProp3: AdditionalProp;
 };
-
-export type BranchesType = {
-  '19.07': AdditionalProp;
-  '21.02': AdditionalProp;
-  '19.08': AdditionalProp;
-};

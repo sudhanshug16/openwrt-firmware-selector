@@ -10,7 +10,7 @@ const config = {
   default_version: '19.07.8',
 
   // Image download URL (optional)
-  base_url: 'https://downloads.openwrt.org',
+  base_url: 'https://asu.aparcar.org',
   releases_directory: 'releases',
   target_directory: 'targets',
 

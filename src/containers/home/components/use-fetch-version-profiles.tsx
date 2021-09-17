@@ -1,17 +1,8 @@
 import Axios from 'axios';
 import { useEffect, useState } from 'react';
+import config from '../../../config';
 import { TitlesEntity } from '../../../types/overview';
 import { getTitle } from '../utils/title';
-
-type Value = {
-  titles: string;
-};
-
-export type Model = {
-  search: string;
-  title: string;
-  value: Value[];
-};
 
 function UseFetchProfiles(version: string, path: string) {
   const [modelSearchData, setModelSearchData] = useState<Array<any>>([]);
@@ -20,11 +11,11 @@ function UseFetchProfiles(version: string, path: string) {
 
   useEffect(() => {
     if (!version) return;
-    const baseUrl = 'https://asu.aparcar.org';
+    const { base_url } = config;
     const request = async () => {
       try {
         const res = await Axios.get(
-          `${baseUrl}/json/v1/${path.replace('{version}', version)}/overview.json`
+          `${base_url}/json/v1/${path.replace('{version}', version)}/overview.json`
         );
 
         const versionProfiles = res.data.profiles;

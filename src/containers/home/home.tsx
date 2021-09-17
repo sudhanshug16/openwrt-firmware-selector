@@ -1,13 +1,9 @@
-import React, { Suspense, FunctionComponent, useState } from 'react';
-import { Container, Paper, Box, Typography, Grid, CircularProgress } from '@material-ui/core';
+import { Box, CircularProgress, Container, Grid, Paper, Typography } from '@material-ui/core';
+import React, { FunctionComponent, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import ProfileSearch from './components/ProfileSearch';
-import VersionSelector from './components/VersionSelector';
-import ProfileDetails from './components/ProfileDetails';
-import config from '../../config';
-import { ProfilesEntity } from '../../types/overview';
-import useFetchEntryData from './components/use-fetch-entry-data';
 import { Overview } from './components/types';
+import useFetchEntryData from './components/use-fetch-entry-data';
+import VersionSelector from './components/VersionSelector';
 
 const Home: FunctionComponent = () => {
   const entryData = useFetchEntryData();
@@ -42,14 +38,6 @@ const Home: FunctionComponent = () => {
                 )}
               </Suspense>
             </Grid>
-            {/* {selectedProfile && ( */}
-            <Box>
-              {/* <ProfileDetails
-                  selectedProfile={selectedProfile}
-                  selectedVersion={selectedVersion}
-                /> */}
-            </Box>
-            {/* )} */}
           </Box>
         </Paper>
       </Box>

@@ -2,9 +2,8 @@ import { FormControl, Grid, InputLabel, MenuItem, Select } from '@material-ui/co
 import React, { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import config from '../../../config';
-import ProfileDetails from './ProfileDetails';
 import ProfileSearch from './ProfileSearch';
-import { AdditionalProp, Branches, Overview } from './types';
+import { Overview } from './types';
 
 type Props = {
   initialVersion?: string;

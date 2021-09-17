@@ -25,10 +25,9 @@ import {
 } from '@material-ui/core';
 import { Launch, CloudDownload, Add, ExpandMore } from '@material-ui/icons';
 import axios from 'axios';
-import { isEqual } from 'lodash';
+import { isEqual, sortBy } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { DateTime } from 'luxon';
-
 import { ProfilesEntity } from '../../../types/overview';
 import { Profile, TitlesEntity } from '../../../types/profile';
 import config from '../../../config';
@@ -48,11 +47,12 @@ const useStyles = makeStyles(() => ({
 type Props = {
   selectedVersion: string;
   selectedProfile: ProfilesEntity;
+  path: string;
 };
 
 const profilesData: { [key: string]: Profile } = {};
 
-const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedProfile }) => {
+const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedProfile, path }) => {
   const classes = useStyles();
   const [profile, setProfile] = useState<Profile>();
   const [showAddPackages, setShowAddPackages] = useState(false);
@@ -96,10 +96,13 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     let profileData = profilesData[selectedProfile.id];
 
     if (!profileData) {
+      const { base_url } = config;
       const response = await axios.get<Profile>(
-        `${process.env.PUBLIC_URL}/data/${selectedVersion}` +
-          `/${selectedProfile.target}/${selectedProfile.id}.json?t=${new Date().getTime()}`
+        `${base_url}/json/v1/${path.replace('{version}', selectedVersion)}/targets/${
+          selectedProfile.target
+        }/${selectedProfile.id}.json?t=${new Date().getTime()}`
       );
+
       profileData = response.data;
       profilesData[selectedProfile.id] = profileData;
     }
@@ -121,11 +124,11 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
     };
   }, [selectedVersion, selectedProfile, getProfileData, profile]);
 
-  const toggleAddPackages = () => {
-    if (!profile) return;
-    setShowAddPackages(!showAddPackages);
-    setCustomPackages(new Set(preExistingPackages()));
-  };
+  // const toggleAddPackages = () => {
+  //   if (!profile) return;
+  //   setShowAddPackages(!showAddPackages);
+  //   setCustomPackages(new Set(preExistingPackages()));
+  // };
 
   const appendAddPackageInput = (
     e?: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -155,6 +158,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
   const buildCustomImage = async () => {
     setBuildStatus('Please wait...');
     setBuildError(undefined);
+
     try {
       const response = await asu.build(
         Array.from(customPackages.values()),
@@ -164,16 +168,16 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
         onBuildStatusChange
       );
       setBuildResponse(response);
-    } catch (e) {
-      console.log(e);
+    } catch (e: unknown) {
       setBuildError(e.response.data.message);
     }
     setBuildStatus(undefined);
   };
 
-  const buildAt = DateTime.fromFormat(profile.build_at, 'yyyy-MM-dd TT').toLocaleString(
-    DateTime.DATETIME_MED
-  );
+  const buildAt = profile.build_at
+    ? DateTime.fromFormat(profile.build_at, 'yyyy-MM-dd TT').toLocaleString(DateTime.DATETIME_MED)
+    : null;
+
   const hasAbilityToBuildCustomPackages = Object.keys(config).includes('asu_url');
   const canBuild = !isEqual(Array.from(customPackages.values()), preExistingPackages());
   const isBuilding = typeof buildStatus === 'string';
@@ -185,7 +189,6 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
           {t('tr-version-build')}
         </Typography>
       </Box>
-
       <TableContainer>
         <Table>
           <TableBody>
@@ -205,10 +208,12 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
                 {profile.version_number} ({profile.version_code})
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell>{t('tr-date')}</TableCell>
-              <TableCell>{buildAt.toLocaleString()}</TableCell>
-            </TableRow>
+            {buildAt && (
+              <TableRow>
+                <TableCell>{t('tr-date')}</TableCell>
+                <TableCell>{buildAt}</TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell>Info</TableCell>
               <TableCell>
@@ -243,7 +248,7 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
         </Table>
       </TableContainer>
       <Box paddingTop={3} paddingBottom={2}>
-        <Typography variant="h5" component="h3" align="left">
+        {/*  <Typography variant="h5" component="h3" align="left">
           {t('tr-downloads')}
         </Typography>
       </Box>
@@ -286,118 +291,111 @@ const ProfileDetails: FunctionComponent<Props> = ({ selectedVersion, selectedPro
       <Box paddingTop={3} paddingBottom={2}>
         <Typography variant="h5" component="h3" align="left">
           {t('Packages')}
-        </Typography>
+        </Typography>*/}
       </Box>
-      {profile.default_packages && profile.default_packages.length > 0 && (
+      {/* {profile.default_packages && profile.default_packages.length > 0 && (
         <Box mb={2}>
           <Typography variant="h6" align="left">
             {t('Default Packages')}
           </Typography>
           {profile.default_packages?.join(', ')}
         </Box>
-      )}
-      {profile.device_packages && profile.device_packages.length > 0 && (
+      )} */}
+      {/* {profile.device_packages && profile.device_packages.length > 0 && (
         <Box mb={2}>
           <Typography variant="h6" align="left">
             {t('Device Packages')}
           </Typography>
           {profile.device_packages.join(', ')}
         </Box>
-      )}
+      )} */}
       {hasAbilityToBuildCustomPackages && (
         <Box>
-          {!showAddPackages && (
-            <Button variant="outlined" size="small" onClick={toggleAddPackages}>
-              customize packages
-            </Button>
-          )}
-          {showAddPackages && (
-            <>
-              <Typography variant="h6" align="left">
-                {t('Customize Packages')}
-                <Box display="inline-block" ml={2}>
-                  <Link href="https://openwrt.org/packages/table/start" target="_blank">
-                    <Typography variant="caption">find packages index on this page</Typography>
-                  </Link>
-                </Box>
-              </Typography>
-              <br />
-              {Array.from(customPackages.values()).map((p) => {
-                return (
-                  <Box key={p} pr={1} pb={1} display="inline-block">
-                    <Chip
-                      size="small"
-                      label={p}
-                      color={isBuilding ? 'default' : 'primary'}
-                      className={classes.chip}
-                      onDelete={() => {
-                        if (!isBuilding)
-                          setCustomPackages((prev) => {
-                            const newSet = new Set(Array.from(prev.values()));
-                            newSet.delete(p);
-                            return newSet;
-                          });
-                      }}
-                    />
-                  </Box>
-                );
-              })}
-              <br />
-              <FormControl size="small">
-                <InputLabel style={{ fontSize: '0.9em' }}>Custom Package Name</InputLabel>
-                <Input
-                  value={customPackagesInputValue}
-                  disabled={isBuilding}
-                  onChange={(e) => e && setCustomPackagesInputValue(e.currentTarget.value)}
-                  onKeyUp={appendAddPackageInput}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => appendAddPackageInput()}>
-                        <Add />
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              </FormControl>
-              {showPackageExistsError && (
-                <Box pt={2}>
-                  <Typography color="error" variant="caption" component="div">
-                    This profile already includes this package. Please try a diffrent one
-                  </Typography>
-                </Box>
-              )}
-              <Box mt={3}>
-                {!buildStatus && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={!canBuild}
-                    onClick={buildCustomImage}
-                  >
-                    build customized image
-                  </Button>
-                )}
-                {buildStatus && (
-                  <>
-                    <Grid
-                      container
-                      alignContent="center"
-                      direction="row"
-                      alignItems="center"
-                      spacing={2}
-                    >
-                      {isBuilding && (
-                        <Grid item>
-                          <CircularProgress />
-                        </Grid>
-                      )}
-                      <Grid item>{buildStatus}</Grid>
-                    </Grid>
-                  </>
-                )}
+          <>
+            <Typography variant="h6" align="left">
+              {t('Customize Packages')}
+              <Box display="inline-block" ml={2}>
+                <Link href="https://openwrt.org/packages/table/start" target="_blank">
+                  <Typography variant="caption">find packages index on this page</Typography>
+                </Link>
               </Box>
-            </>
-          )}
+            </Typography>
+            <br />
+            {sortBy(Array.from(customPackages.values())).map((p) => {
+              return (
+                <Box key={p} pr={1} pb={1} display="inline-block">
+                  <Chip
+                    size="small"
+                    label={p}
+                    color={isBuilding ? 'default' : 'primary'}
+                    className={classes.chip}
+                    onDelete={() => {
+                      if (!isBuilding)
+                        setCustomPackages((prev) => {
+                          const newSet = new Set(Array.from(prev.values()));
+                          newSet.delete(p);
+                          return newSet;
+                        });
+                    }}
+                  />
+                </Box>
+              );
+            })}
+            <br />
+            <FormControl size="small">
+              <InputLabel style={{ fontSize: '0.9em' }}>Custom Package Name</InputLabel>
+              <Input
+                value={customPackagesInputValue}
+                disabled={isBuilding}
+                onChange={(e) => e && setCustomPackagesInputValue(e.currentTarget.value)}
+                onKeyUp={appendAddPackageInput}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => appendAddPackageInput()}>
+                      <Add />
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+            {showPackageExistsError && (
+              <Box pt={2}>
+                <Typography color="error" variant="caption" component="div">
+                  This profile already includes this package. Please try a diffrent one
+                </Typography>
+              </Box>
+            )}
+            <Box mt={3}>
+              {!buildStatus && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={!canBuild}
+                  onClick={buildCustomImage}
+                >
+                  build customized image
+                </Button>
+              )}
+              {buildStatus && (
+                <>
+                  <Grid
+                    container
+                    alignContent="center"
+                    direction="row"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    {isBuilding && (
+                      <Grid item>
+                        <CircularProgress />
+                      </Grid>
+                    )}
+                    <Grid item>{buildStatus}</Grid>
+                  </Grid>
+                </>
+              )}
+            </Box>
+          </>
           {buildError && <Typography color="error">{buildError}</Typography>}
           {buildResponse && (
             <Box mt={3}>

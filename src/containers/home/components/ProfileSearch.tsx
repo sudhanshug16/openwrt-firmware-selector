@@ -1,97 +1,67 @@
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
-import { CircularProgress, TextField } from '@material-ui/core';
-import { Autocomplete, AutocompleteRenderInputParams, FilterOptionsState } from '@material-ui/lab';
-import Axios from 'axios';
-import { isEqual, throttle } from 'lodash';
-import { matchSorter } from 'match-sorter';
+import { CircularProgress, Grid, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
+import match from 'autosuggest-highlight/match';
+import parse from 'autosuggest-highlight/parse';
+import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { Overview, ProfilesEntity } from '../../../types/overview';
-import { getTitle } from '../utils/title';
+import { ProfilesEntity } from '../../../types/overview';
+import ProfileDetails from './ProfileDetails';
+import useFetchProfiles from './use-fetch-version-profiles';
 
 type Props = {
   selectedVersion: string;
-  onProfileChange: (profile: ProfilesEntity) => void;
+  onProfileChange?: (profile: ProfilesEntity) => void;
+  currentBranch: string;
+  path: string;
 };
 
-type SearchData = { value: ProfilesEntity; search: string; title: string };
+export type SearchData = { value: ProfilesEntity; search: string; title: string };
 
-const overviewData: { [key: string]: Overview } = {};
-
-const ProfileSearch: FunctionComponent<Props> = ({ selectedVersion, onProfileChange }) => {
-  const [searchData, setSearchData] = useState<SearchData[]>([]);
-  const [working, toggleWorking] = useState<boolean>(true);
+const ProfileSearch: FC<Props> = ({ selectedVersion, path }) => {
   const { t } = useTranslation();
+  const profiles = useFetchProfiles(selectedVersion, path);
+  const [selectedModel, setSelectedModel] = useState<SearchData | null>();
 
-  const getSearchData = useCallback(async () => {
-    let overview = overviewData[selectedVersion];
-    const searchDataArray: SearchData[] = [];
+  const modelSearchData = (profiles[0] as unknown) as SearchData[];
 
-    toggleWorking(true);
-
-    if (!overview) {
-      const overviewPath = `${
-        process.env.PUBLIC_URL
-      }/data/${selectedVersion}/overview.json?t=${new Date().getTime()}`;
-      const response = await Axios.get<Overview>(overviewPath);
-      overview = response.data;
-      overviewData[selectedVersion] = overview;
-    }
-
-    toggleWorking(false);
-
-    overview.profiles.forEach((profile) => {
-      profile.titles.forEach((titleEntity) => {
-        const title = getTitle(titleEntity);
-        searchDataArray.push({
-          value: profile,
-          search: profile.id + title,
-          title,
-        });
-      });
-    });
-
-    return searchDataArray;
-  }, [selectedVersion]);
-
-  useEffect(() => {
-    getSearchData().then((_searchData) => {
-      if (!isEqual(_searchData, searchData)) setSearchData(_searchData);
-    });
-  }, [getSearchData, searchData, selectedVersion]);
-
-  const handleProfileSelect = (_: unknown, searchDataRow: SearchData | null) => {
-    if (searchDataRow) onProfileChange(searchDataRow.value);
-  };
-
-  const getOptionLabel = (option: SearchData) => option.title;
-
-  const renderInput = (params: AutocompleteRenderInputParams) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <TextField {...params} fullWidth variant="outlined" label={t('tr-model')} />
-  );
-
-  const filterOptions: (
-    options: SearchData[],
-    state: FilterOptionsState<SearchData>
-  ) => SearchData[] = (options, { inputValue }) =>
-    throttle(() => {
-      return matchSorter(options, inputValue.replaceAll?.(' ', '') || inputValue, {
-        keys: ['search'],
-      }).slice(0, 10);
-    }, 1000)() || [];
-
-  if (working) return <CircularProgress />;
+  if (!modelSearchData) return <CircularProgress />;
 
   return (
-    <Autocomplete
-      data-testid="search-autocomplete"
-      options={searchData}
-      getOptionLabel={getOptionLabel}
-      renderInput={renderInput}
-      filterOptions={filterOptions}
-      onChange={handleProfileSelect}
-    />
+    <>
+      <Autocomplete
+        data-testid="search-autocomplete"
+        options={modelSearchData}
+        getOptionLabel={(option) => option.title}
+        renderInput={(params) => (
+          <TextField {...params} fullWidth variant="outlined" label={t('tr-model')} />
+        )}
+        renderOption={(option, { inputValue }) => {
+          const matches = match(option.title, inputValue);
+          const parts = parse(option.title, matches);
+          return (
+            <div>
+              {parts.map((part, index) => (
+                <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
+                  {part.text}
+                </span>
+              ))}
+            </div>
+          );
+        }}
+        onChange={(e, selectedItem) => {
+          setSelectedModel(selectedItem);
+        }}
+      />
+      {selectedModel && (
+        <Grid item xs={12} md>
+          <ProfileDetails
+            path={path}
+            selectedProfile={selectedModel.value}
+            selectedVersion={selectedVersion}
+          />
+        </Grid>
+      )}
+    </>
   );
 };
 

@@ -1,8 +1,8 @@
-export interface Overview {
-  image_url: string;
-  profiles: ProfilesEntity[];
-  release: string;
-}
+// export interface Overview {
+//   image_url: string;
+//   profiles: ProfilesEntity[];
+//   release: string;
+// }
 export interface ProfilesEntity {
   id: string;
   target: string;
